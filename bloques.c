@@ -3,6 +3,7 @@
 static int descriptor=0;
 
 int bmount(const char *camino){
+    umask(000);
     descriptor=open(camino,O_RDWR | O_CREAT,0666);
     if(descriptor==-1){
         perror("Error");

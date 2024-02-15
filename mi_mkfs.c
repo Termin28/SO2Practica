@@ -12,7 +12,7 @@ int main(int argc, char **argv){
     memset(buffer,0,BLOCKSIZE);
     int nbloques=atoi(argv[2]);
     for(int i=0;i<nbloques;i++){
-        if(bwrite(nbloques,buffer)==FALLO){
+        if(bwrite(i,buffer)==FALLO){
             return FALLO;
         }
     }

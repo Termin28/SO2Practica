@@ -1,4 +1,4 @@
-#include "bloques.h"
+#include "ficheros_basico.h"
 
 int main(int argc, char **argv){
     if(argc!=3){
@@ -11,11 +11,16 @@ int main(int argc, char **argv){
     unsigned char buffer[BLOCKSIZE];
     memset(buffer,0,BLOCKSIZE);
     int nbloques=atoi(argv[2]);
+    int ninodos=nbloques/4;
     for(int i=0;i<nbloques;i++){
         if(bwrite(i,buffer)==FALLO){
             return FALLO;
         }
     }
+    initSB(nbloques,ninodos);
+    initMB();
+    initAI();
+
     if(bumount()==FALLO){
         return FALLO;
     }

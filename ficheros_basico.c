@@ -22,7 +22,7 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
     SB.posPrimerBloqueMB=posSB+tamSB;
     SB.posUltimoBloqueMB=SB.posPrimerBloqueMB + tamMB(nbloques) -1;
     SB.posPrimerBloqueAI=SB.posUltimoBloqueMB+1;
-    SB.posUltimoBloqueAI=SB.posPrimerBloqueAI+tamAI(nbloques)-1;
+    SB.posUltimoBloqueAI=SB.posPrimerBloqueAI+tamAI(ninodos)-1;
     SB.posPrimerBloqueDatos=SB.posUltimoBloqueAI+1;
     SB.posUltimoBloqueDatos=nbloques-1;
     SB.posInodoRaiz=0;
@@ -39,17 +39,21 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
 
 int initMB(){
     struct superbloque SB;
+
     char bufferMB[BLOCKSIZE];
     memset(bufferMB,255,BLOCKSIZE);
+
     if(bread(posSB,&SB)==FALLO){
         return FALLO;
     }
+
     int tam=tamSB+tamMB(SB.totBloques)+tamAI(SB.totInodos);
     int bytes=tam/8;
-    int ocupados=bytes/1024;
-    if(bytes%1024!=0){
+    int ocupados=bytes/BLOCKSIZE;
+    if(bytes%BLOCKSIZE!=0){
         ocupados++;
     }
+
     int posbloqueMB=SB.posPrimerBloqueMB;
     for(int i=0;i<ocupados-1;i++){
         if(bwrite(posbloqueMB,bufferMB)==FALLO){
@@ -57,6 +61,11 @@ int initMB(){
         }
         posbloqueMB++;
     }
+
+    while(bytes>=BLOCKSIZE){
+        bytes-=BLOCKSIZE;
+    }
+
     memset(bufferMB,0,BLOCKSIZE);
     for(int i=0;i<bytes;i++){
         bufferMB[i]=255;
@@ -95,7 +104,7 @@ int initAI(){
                 break;
             }
         }
-        if(bwrite(i,inodos)==FALLO){
+        if(bwrite(i,&inodos)==FALLO){
             return FALLO;
         }
     }

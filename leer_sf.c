@@ -24,7 +24,7 @@ int main(int argc,char **argv){
     printf("cantInodosLibres = %d\n",SB.cantInodosLibres);
     printf("totBloques = %d\n",SB.totBloques);
     printf("totInodos = %d\n",SB.totInodos);
-
+    /*
     printf("\nsizeof struct superbloque = %ld\n",sizeof(struct superbloque));
     printf("sizeof struct inodo = %ld\n",sizeof(struct inodo));
 
@@ -47,6 +47,19 @@ int main(int argc,char **argv){
             
         }
     }
+    */
+    printf("\nRESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
+    int bloque=reservar_bloque();
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+    printf("Se ha reservado el bloque físico nº %d que era el 1º libre indicado por el MB SB.cantBloquesLibres = %d\n",bloque,SB.cantBloquesLibres);
+    bloque=liberar_bloque(bloque);
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+    printf("Liberamos ese bloque y después SB.cantBloquesLibres = %d\n",SB.cantBloquesLibres);
 
-
+    printf("\nMAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
+    
 }

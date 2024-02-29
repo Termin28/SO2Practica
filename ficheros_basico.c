@@ -110,3 +110,204 @@ int initAI(){
     }
     return EXITO;
 }
+
+int escribir_bit(unsigned int nbloque, unsigned int bit){
+    struct superbloque SB;
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+    int posbyte=nbloque/8;
+    int posbit=nbloque%8;
+    int nbloqueMB=posbyte/BLOCKSIZE;
+
+    int nbloqueabs=SB.posPrimerBloqueMB+nbloqueMB;
+    unsigned char bufferMB[BLOCKSIZE];
+    if(bread(nbloqueabs,bufferMB)==FALLO){
+        return FALLO;
+    }
+
+    unsigned char mascara=128;
+    mascara>>=posbit;
+    if(bit==1){
+        bufferMB[posbyte]|=mascara;
+    }else{
+        bufferMB[posbyte]&=~mascara;
+    }
+    if(bwrite(nbloqueabs,bufferMB)==FALLO){
+        return FALLO;
+    }
+    return EXITO;
+}
+
+char leer_bit(unsigned int nbloque){
+    struct superbloque SB;
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+    int posbyte=nbloque/8;
+    int posbit=nbloque%8;
+    int nbloqueMB=posbyte/BLOCKSIZE;
+
+    int nbloqueabs=SB.posPrimerBloqueMB+nbloqueMB;
+    unsigned char bufferMB[BLOCKSIZE];
+    if(bread(nbloqueabs,bufferMB)==FALLO){
+        return FALLO;
+    }
+    posbyte=posbyte%BLOCKSIZE;
+
+    unsigned char mascara = 128; // 10000000
+    mascara >>= posbit;          // desplazamiento de bits a la derecha, los que indique posbit
+    mascara &= bufferMB[posbyte]; // operador AND para bits
+    mascara >>= (7 - posbit);
+
+    return mascara;
+}
+
+int reservar_bloque(){
+    struct superbloque SB;
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+
+    if(SB.cantBloquesLibres==0){
+        return FALLO;
+    }
+
+    unsigned char bufferMB[BLOCKSIZE];
+    unsigned char bufferAux[BLOCKSIZE];
+    memset(bufferAux, 255, BLOCKSIZE);
+
+    int nbloqueMB=-1;
+    int found=0;
+    while(found==0){
+        nbloqueMB++;
+        if(bread(nbloqueMB + SB.posPrimerBloqueMB , bufferMB)==FALLO){
+            return FALLO;
+        }
+        found=memcmp(bufferAux,bufferMB,BLOCKSIZE);
+    }
+
+    int posbyte=0;
+    while(bufferMB[posbyte]==255){
+        posbyte++;
+    }
+
+    unsigned char mascara = 128; // 10000000
+    int posbit = 0;
+    while (bufferMB[posbyte] & mascara) { // operador AND para bits
+        bufferMB[posbyte] <<= 1;          // desplazamiento de bits a la izquierda
+        posbit++;
+    }
+    int nbloque = (nbloqueMB * BLOCKSIZE + posbyte) * 8 + posbit;
+    if(escribir_bit(nbloque,1)==FALLO){
+        return FALLO;
+    }
+
+    memset(bufferAux,0,BLOCKSIZE);
+    if(bwrite(nbloque,bufferAux)==FALLO){
+        return FALLO;
+    }
+
+    SB.cantBloquesLibres--;
+    if(bwrite(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+
+    return nbloque;
+}
+
+int liberar_bloque(unsigned int nbloque){
+    if(escribir_bit(nbloque,0)==FALLO){
+        return FALLO;
+    }
+
+    struct superbloque SB;
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+    SB.cantBloquesLibres++;
+    if(bwrite(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+    return nbloque;
+}
+
+int escribir_inodo(unsigned int ninodo, struct inodo *inodo){
+    struct superbloque SB;
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+
+    int bloqueinodo=SB.posPrimerBloqueAI+(ninodo/(BLOCKSIZE/INODOSIZE));
+
+    struct inodo inodos[BLOCKSIZE/INODOSIZE];
+    if(bread(bloqueinodo,&inodos)==FALLO){
+        return FALLO;
+    }
+
+    inodos[ninodo%(BLOCKSIZE/INODOSIZE)]=*inodo;
+    if(bwrite(bloqueinodo,inodos)==FALLO){
+        return FALLO;
+    }
+    return EXITO;
+}
+
+int leer_inodo(unsigned int ninodo, struct inodo *inodo){
+    struct superbloque SB;
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+
+    int bloqueinodo=SB.posPrimerBloqueAI+(ninodo/(BLOCKSIZE/INODOSIZE));
+
+    struct inodo inodos[BLOCKSIZE/INODOSIZE];
+
+    if(bread(bloqueinodo,&inodos)==FALLO){
+        return FALLO;
+    }
+
+    *inodo=inodos[ninodo%(BLOCKSIZE/INODOSIZE)];
+    return EXITO;
+}
+
+int reservar_inodo(unsigned char tipo, unsigned char permisos){
+    struct superbloque SB;
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+
+    if(SB.cantInodosLibres==0){
+        return FALLO;
+    }
+
+    struct inodo inodo;
+    int posInodoReservado=SB.posPrimerInodoLibre;
+    
+    if(leer_inodo(posInodoReservado,&inodo)==FALLO){
+        return FALLO;
+    }
+    
+    SB.posPrimerInodoLibre=inodo.punterosDirectos[0];
+    inodo.tipo=tipo;
+    inodo.permisos=permisos;
+    inodo.nlinks=1;
+    inodo.tamEnBytesLog=0;
+    inodo.atime=time(NULL);
+    inodo.ctime=time(NULL);
+    inodo.mtime=time(NULL);
+    inodo.numBloquesOcupados=0;
+    memset(inodo.punterosDirectos,0,sizeof(inodo.punterosDirectos));
+    memset(inodo.punterosIndirectos,0,sizeof(inodo.punterosIndirectos));
+    
+    if(escribir_inodo(posInodoReservado,&inodo)==FALLO){
+        return FALLO;
+    }
+    
+    SB.cantInodosLibres--;
+    
+    if(bwrite(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+    
+    return posInodoReservado;
+}

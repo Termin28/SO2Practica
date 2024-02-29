@@ -61,5 +61,32 @@ int main(int argc,char **argv){
     printf("Liberamos ese bloque y después SB.cantBloquesLibres = %d\n",SB.cantBloquesLibres);
 
     printf("\nMAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
-    
+    printf("posSB: %d → leer_bit(%d) = %d\n",posSB,posSB,leer_bit(posSB));
+    printf("SB.posprimerbloquedatos: %d → leer_bit(%d) = %d\n",SB.posPrimerBloqueDatos,SB.posPrimerBloqueDatos,leer_bit(SB.posPrimerBloqueDatos));
+
+    struct tm *ts;
+    char atime[80];
+    char mtime[80];
+    char ctime[80];
+
+
+    struct inodo inodo;
+    int ninodo=0;
+    leer_inodo(ninodo,&inodo);
+    ts = localtime(&inodo.atime);
+    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
+    ts = localtime(&inodo.mtime);
+    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
+    ts = localtime(&inodo.ctime);
+    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
+
+    printf("\nDATOS DEL DIRECTORIO RAIZ\n");
+    printf("tipo: %c\n",inodo.tipo);
+    printf("permisos: %d\n",inodo.permisos);
+    printf("atime: %s\n",atime);
+    printf("ctime: %s\n",ctime);
+    printf("mtime: %s\n",mtime);
+    printf("nlinks: %d\n",inodo.nlinks);
+    printf("tamEnBytesLog: %d\n",inodo.tamEnBytesLog);
+    printf("numBloquesOcupados: %d\n",inodo.numBloquesOcupados);
 }

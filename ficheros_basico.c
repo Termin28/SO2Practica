@@ -153,13 +153,18 @@ char leer_bit(unsigned int nbloque){
     if(bread(nbloqueabs,bufferMB)==FALLO){
         return FALLO;
     }
+    int prev=posbyte;
     posbyte=posbyte%BLOCKSIZE;
+
 
     unsigned char mascara = 128; // 10000000
     mascara >>= posbit;          // desplazamiento de bits a la derecha, los que indique posbit
     mascara &= bufferMB[posbyte]; // operador AND para bits
     mascara >>= (7 - posbit);
 
+    #if DEBUG
+        printf(ANSI_COLOR_GRIS"[leer_bit(%d)→ posbyte:%d, posbyte (ajustado): %d, posbit:%d, nbloqueMB:%d, nbloqueabs:%d)]\n"ANSI_COLOR_RESET,nbloque,prev,posbyte,posbit,nbloqueMB,nbloqueabs);
+    #endif
     return mascara;
 }
 

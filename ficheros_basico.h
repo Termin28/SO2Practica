@@ -3,6 +3,9 @@
 #include <limits.h>
 #define posSB 0 // el superbloque se escribe en el primer bloque de nuestro FS
 #define tamSB 1
+#define ANSI_COLOR_GRIS "\x1b[94m"
+#define ANSI_COLOR_RESET "\x1b[0m"
+#define DEBUG 1
 
 #define INODOSIZE 128 // tamaño en bytes de un inodo
 

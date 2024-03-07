@@ -48,6 +48,7 @@ int main(int argc,char **argv){
         }
     }
     */
+   /*
     printf("\nRESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
     int bloque=reservar_bloque();
     if(bread(posSB,&SB)==FALLO){
@@ -94,4 +95,48 @@ int main(int argc,char **argv){
     printf("nlinks: %d\n",inodo.nlinks);
     printf("tamEnBytesLog: %d\n",inodo.tamEnBytesLog);
     printf("numBloquesOcupados: %d\n",inodo.numBloquesOcupados);
+    */
+
+    int ninodo=reservar_inodo('f',6);
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+
+    printf("\nINODO 1. TRADUCCION DE LOS BLOQUES LOGICOS 8, 204, 30.004, 400.004 y 468.750\n");
+    printf("\n");
+    struct inodo inodo;
+    if(leer_inodo(ninodo,&inodo)==FALLO){
+        return FALLO;
+    }
+    traducir_bloque_inodo(&inodo,8,1);
+    printf("\n");
+    traducir_bloque_inodo(&inodo,204,1);
+    printf("\n");
+    traducir_bloque_inodo(&inodo,30004,1);
+    printf("\n");
+    traducir_bloque_inodo(&inodo,400004,1);
+    printf("\n");
+    traducir_bloque_inodo(&inodo,468750,1);
+    struct tm *ts;
+    char atime[80];
+    char mtime[80];
+    char ctime[80];
+
+    ts = localtime(&inodo.atime);
+    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
+    ts = localtime(&inodo.mtime);
+    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
+    ts = localtime(&inodo.ctime);
+    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
+
+    printf("\nDATOS DEL INODO RESERVADO\n");
+    printf("tipo: %c\n",inodo.tipo);
+    printf("permisos: %d\n",inodo.permisos);
+    printf("atime: %s\n",atime);
+    printf("ctime: %s\n",ctime);
+    printf("mtime: %s\n",mtime);
+    printf("nlinks: %d\n",inodo.nlinks);
+    printf("tamEnBytesLog: %d\n",inodo.tamEnBytesLog);
+    printf("numBloquesOcupados: %d\n",inodo.numBloquesOcupados);
+    printf("\nSB.posPrimerInodoLibre = %d\n",SB.posPrimerInodoLibre);
 }

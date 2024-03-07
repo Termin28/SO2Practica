@@ -153,7 +153,9 @@ char leer_bit(unsigned int nbloque){
     if(bread(nbloqueabs,bufferMB)==FALLO){
         return FALLO;
     }
-    int prev=posbyte;
+    #if DEBUGN3
+        int prev=posbyte;
+    #endif
     posbyte=posbyte%BLOCKSIZE;
 
 
@@ -162,7 +164,7 @@ char leer_bit(unsigned int nbloque){
     mascara &= bufferMB[posbyte]; // operador AND para bits
     mascara >>= (7 - posbit);
 
-    #if DEBUG
+    #if DEBUGN3
         printf(ANSI_COLOR_GRIS"[leer_bit(%d)→ posbyte:%d, posbyte (ajustado): %d, posbit:%d, nbloqueMB:%d, nbloqueabs:%d)]\n"ANSI_COLOR_RESET,nbloque,prev,posbyte,posbit,nbloqueMB,nbloqueabs);
     #endif
     return mascara;
@@ -315,4 +317,112 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos){
     }
     
     return posInodoReservado;
+}
+
+int obtener_nRangoBL(struct inodo *inodo,unsigned int nblogico,unsigned int *ptr){
+    if(nblogico<DIRECTOS){
+        *ptr=inodo->punterosDirectos[nblogico];
+        return 0;
+    }else if(nblogico<INDIRECTOS0){
+        *ptr=inodo->punterosIndirectos[0];
+        return 1;
+    }else if(nblogico<INDIRECTOS1){
+        *ptr=inodo->punterosIndirectos[1];
+        return 2;
+    }else if(nblogico<INDIRECTOS2){
+        *ptr=inodo->punterosIndirectos[2];
+        return 3;
+    }else{
+        *ptr=0;
+        fprintf(stderr,"Bloque logico fuera de rango");
+        return -1;
+    }
+}
+
+int obtener_indice(unsigned int nblogico,int nivel_punteros){
+    if(nblogico<DIRECTOS){
+        return nblogico;
+    }else if(nblogico<INDIRECTOS0){
+        return nblogico-DIRECTOS;
+    }else if(nblogico<INDIRECTOS1){
+        if(nivel_punteros==2){
+            return (nblogico-INDIRECTOS0)/NPUNTEROS;
+        }else if(nivel_punteros==1){
+            return (nblogico-INDIRECTOS0)%NPUNTEROS;
+        }
+    }else if(nblogico<INDIRECTOS2){
+        if(nivel_punteros==3){
+            return (nblogico-INDIRECTOS1)/(NPUNTEROS*NPUNTEROS);
+        }else if(nivel_punteros==2){
+            return ((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))/NPUNTEROS;
+        }else if(nivel_punteros==1){
+            return ((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))%NPUNTEROS;
+        }
+    }
+    return FALLO;
+}
+
+int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned char reservar){
+    unsigned int ptr=0;
+    unsigned int ptr_ant=0;
+    int nRangoBL=obtener_nRangoBL(inodo,nblogico,&ptr);
+    int nivel_punteros=nRangoBL;
+    int indice;
+    unsigned int buffer[NPUNTEROS];
+    while(nivel_punteros>0){
+        if(ptr==0){
+            if(reservar==0){
+                return -1;
+            }
+            ptr=reservar_bloque();
+            inodo->numBloquesOcupados++;
+            inodo->ctime=time(NULL);
+            if(nivel_punteros==nRangoBL){
+                inodo->punterosIndirectos[nRangoBL-1]=ptr;
+                #if DEBUGN4
+                    printf(ANSI_COLOR_GRIS"[traducir_bloque_inodo()→ inodo.punterosIndirectos[%d] = %d (reservado BF %d para punteros_nivel%d)]\n"ANSI_COLOR_RESET,nRangoBL-1,ptr,ptr,nivel_punteros);
+                #endif
+            }else{
+                buffer[indice]=ptr;
+                #if DEBUGN4
+                    printf(ANSI_COLOR_GRIS"[traducir_bloque_inodo()→ punteros_nivel%d [%d] = %d (reservado BF %d para punteros_nivel%d)]\n"ANSI_COLOR_RESET,nivel_punteros,indice,ptr,ptr,nivel_punteros);
+                #endif
+                if(bwrite(ptr_ant,buffer)==FALLO){
+                    return FALLO;
+                }
+            }
+            memset(buffer,0,BLOCKSIZE);
+        }else{
+            if(bread(ptr,buffer)==FALLO){
+                return FALLO;
+            }
+        }
+        indice=obtener_indice(nblogico,nivel_punteros);
+        if(indice==FALLO){
+            return FALLO;
+        }
+        ptr_ant=ptr;
+        ptr=buffer[indice];
+        nivel_punteros--;
+    }
+
+    if(ptr==0){
+        if(reservar==0){
+            return FALLO;
+        }
+        ptr=reservar_bloque();
+        inodo->numBloquesOcupados++;
+        inodo->ctime=time(NULL);
+        if(nRangoBL==0){
+            inodo->punterosDirectos[nblogico]=ptr;
+            printf(ANSI_COLOR_GRIS"[traducir_bloque_inodo()→ inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n"ANSI_COLOR_RESET,nblogico,ptr,ptr,nblogico);
+        }else{
+            buffer[indice]=ptr;
+            printf(ANSI_COLOR_GRIS"[traducir_bloque_inodo()→ punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n"ANSI_COLOR_RESET,indice,ptr,ptr,nblogico);
+            if(bwrite(ptr_ant,buffer)==FALLO){
+                return FALLO;
+            }
+        }
+    }
+    return ptr;
 }

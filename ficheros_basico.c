@@ -335,7 +335,7 @@ int obtener_nRangoBL(struct inodo *inodo,unsigned int nblogico,unsigned int *ptr
     }else{
         *ptr=0;
         fprintf(stderr,"Bloque logico fuera de rango");
-        return -1;
+        return FALLO;
     }
 }
 
@@ -366,6 +366,9 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
     unsigned int ptr=0;
     unsigned int ptr_ant=0;
     int nRangoBL=obtener_nRangoBL(inodo,nblogico,&ptr);
+    if(nRangoBL==FALLO){
+        return FALLO;
+    }
     int nivel_punteros=nRangoBL;
     int indice;
     unsigned int buffer[NPUNTEROS];

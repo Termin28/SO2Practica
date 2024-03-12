@@ -165,7 +165,7 @@ char leer_bit(unsigned int nbloque){
     mascara >>= (7 - posbit);
 
     #if DEBUGN3
-        printf(ANSI_COLOR_GRIS"[leer_bit(%d)→ posbyte:%d, posbyte (ajustado): %d, posbit:%d, nbloqueMB:%d, nbloqueabs:%d)]\n"ANSI_COLOR_RESET,nbloque,prev,posbyte,posbit,nbloqueMB,nbloqueabs);
+        printf(GRAY"[leer_bit(%d)→ posbyte:%d, posbyte (ajustado): %d, posbit:%d, nbloqueMB:%d, nbloqueabs:%d)]\n"RESET,nbloque,prev,posbyte,posbit,nbloqueMB,nbloqueabs);
     #endif
     return mascara;
 }
@@ -383,12 +383,12 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
             if(nivel_punteros==nRangoBL){
                 inodo->punterosIndirectos[nRangoBL-1]=ptr;
                 #if DEBUGN4
-                    printf(ANSI_COLOR_GRIS"[traducir_bloque_inodo()→ inodo.punterosIndirectos[%d] = %d (reservado BF %d para punteros_nivel%d)]\n"ANSI_COLOR_RESET,nRangoBL-1,ptr,ptr,nivel_punteros);
+                    printf(GRAY"[traducir_bloque_inodo()→ inodo.punterosIndirectos[%d] = %d (reservado BF %d para punteros_nivel%d)]\n"RESET,nRangoBL-1,ptr,ptr,nivel_punteros);
                 #endif
             }else{
                 buffer[indice]=ptr;
                 #if DEBUGN4
-                    printf(ANSI_COLOR_GRIS"[traducir_bloque_inodo()→ punteros_nivel%d [%d] = %d (reservado BF %d para punteros_nivel%d)]\n"ANSI_COLOR_RESET,nivel_punteros,indice,ptr,ptr,nivel_punteros);
+                    printf(GRAY"[traducir_bloque_inodo()→ punteros_nivel%d [%d] = %d (reservado BF %d para punteros_nivel%d)]\n"RESET,nivel_punteros,indice,ptr,ptr,nivel_punteros);
                 #endif
                 if(bwrite(ptr_ant,buffer)==FALLO){
                     return FALLO;
@@ -418,10 +418,10 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
         inodo->ctime=time(NULL);
         if(nRangoBL==0){
             inodo->punterosDirectos[nblogico]=ptr;
-            printf(ANSI_COLOR_GRIS"[traducir_bloque_inodo()→ inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n"ANSI_COLOR_RESET,nblogico,ptr,ptr,nblogico);
+            printf(GRAY"[traducir_bloque_inodo()→ inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n"RESET,nblogico,ptr,ptr,nblogico);
         }else{
             buffer[indice]=ptr;
-            printf(ANSI_COLOR_GRIS"[traducir_bloque_inodo()→ punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n"ANSI_COLOR_RESET,indice,ptr,ptr,nblogico);
+            printf(GRAY"[traducir_bloque_inodo()→ punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n"RESET,indice,ptr,ptr,nblogico);
             if(bwrite(ptr_ant,buffer)==FALLO){
                 return FALLO;
             }

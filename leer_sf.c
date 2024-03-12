@@ -95,7 +95,7 @@ int main(int argc,char **argv){
     printf("nlinks: %d\n",inodo.nlinks);
     printf("tamEnBytesLog: %d\n",inodo.tamEnBytesLog);
     printf("numBloquesOcupados: %d\n",inodo.numBloquesOcupados);
-    */
+    
 
     int ninodo=reservar_inodo('f',6);
     if(bread(posSB,&SB)==FALLO){
@@ -139,4 +139,5 @@ int main(int argc,char **argv){
     printf("tamEnBytesLog: %d\n",inodo.tamEnBytesLog);
     printf("numBloquesOcupados: %d\n",inodo.numBloquesOcupados);
     printf("\nSB.posPrimerInodoLibre = %d\n",SB.posPrimerInodoLibre);
+    */
 }

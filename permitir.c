@@ -2,10 +2,18 @@
 
 int main(int argc,char **argv){
     if(argc!=4){
+        fprintf(stderr,RED"Sintaxis: permitir <nombre_dispositivo> <ninodo> <permisos>"RESET);
         return FALLO;
     }
-    bmount(argv[1]);
-    
-    bumount();
-    return EXITO;
+    if(bmount(argv[1])==FALLO){
+        return FALLO;
+    }
+    int ninodo=atoi(argv[2]);
+    int permisos=atoi(argv[3]);
+    if(mi_chmod_f(ninodo,permisos)==FALLO){
+        return FALLO;
+    }
+    if(bumount()==FALLO){
+        return FALLO;
+    }
 }

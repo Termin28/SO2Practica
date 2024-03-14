@@ -16,6 +16,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     int desp2=(offset+nbytes-1)%BLOCKSIZE;
 
     int nbfisico=traducir_bloque_inodo(&inodo,primerBL,1);
+    if(escribir_inodo(ninodo,&inodo)==FALLO){
+        return FALLO;
+    }
     if(nbfisico==FALLO){
         return FALLO;
     }
@@ -40,8 +43,11 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             return FALLO;
         }
         escritos=aux-desp1;
-        for(int i=primerBL;i<ultimoBL;i++){
+        for(int i=primerBL+1;i<ultimoBL;i++){
             nbfisico=traducir_bloque_inodo(&inodo,i,1);
+            if(escribir_inodo(ninodo,&inodo)==FALLO){
+                return FALLO;
+            }
             if(nbfisico==FALLO){
                 return FALLO;
             }
@@ -53,7 +59,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         }
 
         nbfisico=traducir_bloque_inodo(&inodo,ultimoBL,1);
-        //escribir_inodo(ninodo,&inodo);
+        if(escribir_inodo(ninodo,&inodo)==FALLO){
+            return FALLO;
+        }
         if(nbfisico==FALLO){
             return FALLO;
         }
@@ -91,14 +99,13 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     if(leer_inodo(ninodo,&inodo)==FALLO){
         return FALLO;
     }
-
+    
     if ((inodo.permisos & 4) != 4){
         return FALLO;
     }
 
-    int leidos;
-    if(offset>inodo.tamEnBytesLog){
-        leidos=0;
+    int leidos=0;
+    if(offset>=inodo.tamEnBytesLog){
         return leidos;
     }
 
@@ -114,7 +121,6 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     unsigned char buf_bloque[BLOCKSIZE];
 
     int nbfisico=traducir_bloque_inodo(&inodo,primerBL,0);
-
     if(primerBL==ultimoBL){
         if(nbfisico!=FALLO){   
             if(bread(nbfisico,buf_bloque)==FALLO){
@@ -132,7 +138,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         }
         leidos=BLOCKSIZE-desp1;
 
-        for(int i=primerBL;i<ultimoBL;i++){
+        for(int i=primerBL+1;i<ultimoBL;i++){
             nbfisico=traducir_bloque_inodo(&inodo,i,0);
             if(nbfisico!=FALLO){
                 if(bread(nbfisico,buf_bloque)==FALLO){
@@ -151,6 +157,10 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             memcpy(buf_original+(nbytes-(desp2-1)),buf_bloque,desp2+1);
         }
         leidos+=desp2+1;
+    }
+
+    if(leer_inodo(ninodo,&inodo)==FALLO){
+        return FALLO;
     }
 
     inodo.atime=time(NULL);

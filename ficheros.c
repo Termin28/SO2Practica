@@ -204,3 +204,29 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
     }
     return EXITO;
 }
+
+int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
+    struct inodo inodo;
+    if(leer_inodo(ninodo,&inodo)==FALLO){
+        return FALLO;
+    }
+
+    int primerBL;
+    if(nbytes%BLOCKSIZE==0){
+        primerBL=nbytes/BLOCKSIZE;
+    }else{
+        primerBL=nbytes/BLOCKSIZE+1;
+    }
+    int liberados=liberar_bloques_inodo(primerBL,&inodo);
+    if(liberados==FALLO){
+        return FALLO;
+    }
+    inodo.tamEnBytesLog=nbytes;
+    inodo.numBloquesOcupados-=liberados;
+    inodo.mtime=time(NULL);
+    inodo.ctime=time(NULL);
+    if(escribir_inodo(ninodo,&inodo)==FALLO){
+        return FALLO;
+    }
+    return liberados;
+}

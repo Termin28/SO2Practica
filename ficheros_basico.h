@@ -5,6 +5,7 @@
 #define tamSB 1
 #define DEBUGN3 0
 #define DEBUGN4 1
+#define DEBUGN6 1
 
 #define NPUNTEROS (BLOCKSIZE / sizeof(unsigned int))   // 256 punteros por bloque
 #define DIRECTOS 12
@@ -82,3 +83,6 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos);
 int obtener_nRangoBL(struct inodo *inodo,unsigned int nblogico,unsigned int *ptr);
 int obtener_indice(unsigned int nblogico,int nivel_punteros);
 int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned char reservar);
+int liberar_inodo(unsigned int ninodo);
+int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo);
+

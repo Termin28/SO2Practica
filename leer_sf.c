@@ -1,3 +1,4 @@
+//Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "ficheros_basico.h"
 
 int main(int argc,char **argv){

@@ -1,3 +1,4 @@
+//Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "ficheros_basico.h"
 
 struct STAT {     // comprobar que ocupa 128 bytes haciendo un sizeof(inodo)!!!

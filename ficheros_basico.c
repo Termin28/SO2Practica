@@ -1,4 +1,4 @@
-
+//Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "ficheros_basico.h"
 
 int tamMB(unsigned int nbloques){
@@ -476,7 +476,9 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
     }else{
         ultimoBL=inodo->tamEnBytesLog/BLOCKSIZE;
     }
-
+    #if DEBUGN6
+        printf(BLUE"[liberar_bloques_inodo()→ primer BL: %d, último BL: %d]\n"RESET,primerBL,ultimoBL);
+    #endif
     unsigned int nivel_punteros,indice,ptr=0;
     int nRangoBL;
     unsigned char bufAux_punteros[BLOCKSIZE]; //1024 bytes
@@ -541,5 +543,8 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
             }
         }
     }
+    #if DEBUGN6
+        printf(BLUE"[liberar_bloques_inodo()→ total bloques liberados: %d]\n"RESET,liberados);
+    #endif
     return liberados;
 }

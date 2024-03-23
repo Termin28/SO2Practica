@@ -523,6 +523,9 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
                         if(liberar_bloque(ptr)==FALLO){
                             return FALLO;
                         }
+                        #if DEBUGN6
+                            printf(GRAY"[liberar_bloques_inodo()→ liberado BF %d de punteros_nivel%d correspondiente al BL %d]\n"RESET,ptr,nivel_punteros,nBL);
+                        #endif
                         liberados++;
                         if(nivel_punteros==nRangoBL){
                             inodo->punterosIndirectos[nRangoBL-1]=FALLO;

@@ -1,6 +1,11 @@
 //Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "ficheros_basico.h"
 
+/**
+ * Función que calcula el tamaño en bloques necesarios para el mapa de bits
+ * Recibe: El numero de bloques del dispositivo
+ * Devuelve: La cantidad de bloques necesarios para el mapa de bits
+*/
 int tamMB(unsigned int nbloques){
     int tam=(nbloques/8)/BLOCKSIZE;
     if((nbloques/8)%BLOCKSIZE!=0){
@@ -9,6 +14,11 @@ int tamMB(unsigned int nbloques){
     return tam;
 }
 
+/**
+ * Función que calcula el tamaño de bloques del array de inodos
+ * Recibe: La cantidad de inodos de nuestro sistema
+ * Devuelve: La cantidad de bloques necesarios para el array de inodos
+*/
 int tamAI(unsigned int ninodos){
     int tam=(ninodos*INODOSIZE)/BLOCKSIZE;
     if((ninodos*INODOSIZE)%BLOCKSIZE!=0){
@@ -17,6 +27,11 @@ int tamAI(unsigned int ninodos){
     return tam;
 }
 
+/**
+ * Función que inicializa los datos del superbloque
+ * Recibe: La cantidad de bloques del dispositivo, numero de inodos del dispositivo
+ * Devuelve: 0 si todo va bien. En caso de error devuelve -1
+*/
 int initSB(unsigned int nbloques, unsigned int ninodos){
     struct superbloque SB;
     SB.posPrimerBloqueMB=posSB+tamSB;
@@ -37,6 +52,10 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
     return EXITO;
 }
 
+/**
+ * Función que inicializa el mapa de bits poniendo a 1 los bits que representan los metadatos
+ * Devuelve: 0 si todo va bien. En caso de error devuelve -1
+*/
 int initMB(){
     struct superbloque SB;
 
@@ -49,7 +68,7 @@ int initMB(){
 
     int tam=tamSB+tamMB(SB.totBloques)+tamAI(SB.totInodos);
     int bytes=tam/8;
-    int ocupados=bytes/BLOCKSIZE;
+    int ocupados=bytes/BLOCKSIZE; //Cantidad de bloques ocupados
     if(bytes%BLOCKSIZE!=0){
         ocupados++;
     }
@@ -62,20 +81,25 @@ int initMB(){
         posbloqueMB++;
     }
 
+    //Obtener bytes restantes del ultimo bloque
     while(bytes>=BLOCKSIZE){
         bytes-=BLOCKSIZE;
     }
 
     memset(bufferMB,0,BLOCKSIZE);
+    //Inicializar bytes restantes del ultimo bloque
     for(int i=0;i<bytes;i++){
         bufferMB[i]=255;
     }
-    int resto=tam%8;
+
+    int resto=tam%8; //Bits restantes para poner a 1
+
     bufferMB[bytes]=255;
     bufferMB[bytes]<<=(8-resto);
     if(bwrite(posbloqueMB,bufferMB)==FALLO){
         return FALLO;
     }
+
     SB.cantBloquesLibres=SB.cantBloquesLibres-tam;
     if(bwrite(posSB,&SB)==FALLO){
         return FALLO;
@@ -83,11 +107,16 @@ int initMB(){
     return EXITO;
 }
 
+/**
+ * Función que inicializa la lista de inodos libres
+ * Devuelve: 0 si todo va bien. En caso de error devuelve -1
+*/
 int initAI(){
     struct superbloque SB;
     if(bread(posSB,&SB)==FALLO){
         return FALLO;
     }
+
     struct inodo inodos[BLOCKSIZE/INODOSIZE];
     int contInodos=SB.posPrimerInodoLibre+1;
     for(int i=SB.posPrimerBloqueAI;i<=SB.posUltimoBloqueAI;i++){
@@ -111,6 +140,11 @@ int initAI(){
     return EXITO;
 }
 
+/**
+ * Función que escribe el valor indicado por el parametro bit
+ * Recibe: Nº bloque donde escribir el bit, valor del bit a escribir
+ * Devuelve: 0 si todo va bien. En caso de error devuelve -1
+*/
 int escribir_bit(unsigned int nbloque, unsigned int bit){
     struct superbloque SB;
     if(bread(posSB,&SB)==FALLO){
@@ -139,6 +173,11 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
     return EXITO;
 }
 
+/**
+ * Función que lee un bit del bloque pasado por parametro
+ * Recibe: El Nº Bloque del que leer el bit
+ * Devuelve: Valor del bit leido. En caso de error devuelve -1
+*/
 char leer_bit(unsigned int nbloque){
     struct superbloque SB;
     if(bread(posSB,&SB)==FALLO){
@@ -170,6 +209,10 @@ char leer_bit(unsigned int nbloque){
     return mascara;
 }
 
+/**
+ * Función que encuentra el primer bloque libre y lo ocupa
+ * Devuelve: La posición del bloque ocupado. En caso de error devuelve -1
+*/
 int reservar_bloque(){
     struct superbloque SB;
     if(bread(posSB,&SB)==FALLO){
@@ -223,6 +266,11 @@ int reservar_bloque(){
     return nbloque;
 }
 
+/**
+ * Función que libera un bloque determinado
+ * Recibe: La posición del bloque a liberar
+ * Devuelve: La posición del bloque liberado. En caso de error devuelve -1
+*/
 int liberar_bloque(unsigned int nbloque){
     if(escribir_bit(nbloque,0)==FALLO){
         return FALLO;
@@ -239,6 +287,11 @@ int liberar_bloque(unsigned int nbloque){
     return nbloque;
 }
 
+/**
+ * Función que escribe el contienido de una variable struct inodo a un determinado inodo de la lista de inodos
+ * Recibe: Nº inodo al que escribir, variable struct inodo pasada por referencia
+ * Devuelve: 0 si todo va bien. En caso de error devuelve -1
+*/
 int escribir_inodo(unsigned int ninodo, struct inodo *inodo){
     struct superbloque SB;
     if(bread(posSB,&SB)==FALLO){
@@ -259,6 +312,11 @@ int escribir_inodo(unsigned int ninodo, struct inodo *inodo){
     return EXITO;
 }
 
+/**
+ * Función que lee el contenido de un determinado inodo del array de inodos y lo vuelca a una variable struct inodo
+ * Recibe: Nº inodo al que escribir, variable struct inodo pasada por referencia
+ * Devuelve: 0 si todo va bien. En caso de error devuelve -1
+*/
 int leer_inodo(unsigned int ninodo, struct inodo *inodo){
     struct superbloque SB;
     if(bread(posSB,&SB)==FALLO){
@@ -277,6 +335,11 @@ int leer_inodo(unsigned int ninodo, struct inodo *inodo){
     return EXITO;
 }
 
+/**
+ * Función que encuentra el primer inodo libre y lo reserva
+ * Recibe: Tipo al que poner al inodo, los permisos a poner al inodo
+ * Devuelve: La posición del inodo reservado. En caso de error devuelve -1
+*/
 int reservar_inodo(unsigned char tipo, unsigned char permisos){
     struct superbloque SB;
     if(bread(posSB,&SB)==FALLO){
@@ -319,6 +382,13 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos){
     return posInodoReservado;
 }
 
+/**
+ * Función para obtener el rango de punteros en el que se situa el bloque logico
+ * Recibe: Variable struct inodo que contiene los punteros, Nº Bloque logico, 
+ * puntero pasado por referencia para obtener la direccion almacenada en el puntero correspondiente del inodo
+ * Devuelve: Rango de punteros. En caso de error devuelve -1
+ * 
+*/
 int obtener_nRangoBL(struct inodo *inodo,unsigned int nblogico,unsigned int *ptr){
     if(nblogico<DIRECTOS){
         *ptr=inodo->punterosDirectos[nblogico];
@@ -339,6 +409,11 @@ int obtener_nRangoBL(struct inodo *inodo,unsigned int nblogico,unsigned int *ptr
     }
 }
 
+/**
+ * Función para obtener el indice del bloque de punteros
+ * Recibe: Nº Bloque logico, nivel de punteros
+ * Devuelve: Indice del bloque logico. En caso de error devuelve -1
+*/
 int obtener_indice(unsigned int nblogico,int nivel_punteros){
     if(nblogico<DIRECTOS){
         return nblogico;
@@ -362,6 +437,11 @@ int obtener_indice(unsigned int nblogico,int nivel_punteros){
     return FALLO;
 }
 
+/**
+ * Función para obtener el bloque fisico en el que se situa un bloque logico de un determinado inodo
+ * Recibe: Variable struct inodo, Nº Bloque logico, variable que indica si queremos leer o consultar el bloque fisico 
+ * Devuelve: La posición del bloque fisico. En caso de error devuelve -1
+*/
 int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned char reservar){
     unsigned int ptr=0;
     unsigned int ptr_ant=0;
@@ -430,6 +510,11 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
     return ptr;
 }
 
+/**
+ * Función que libera un inodo
+ * Recibe: Nº inodo a liberar
+ * Devuelve: Nº inodo liberado.En caso de error devuelve -1
+*/
 int liberar_inodo(unsigned int ninodo){
     struct inodo inodo;
     if(leer_inodo(ninodo,&inodo)==FALLO){
@@ -464,6 +549,11 @@ int liberar_inodo(unsigned int ninodo){
     return ninodo;
 }
 
+/**
+ * Función que libera todos los bloques ocupados a partir del bloque logico indicado por el argumento
+ * Recibe: Posicion primer bloque logico, inodo donde se liberaran los bloques
+ * Devuelve: Cantidad de bloques liberados. En caso de error devuelve -1
+*/
 int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
     int liberados=0;
     if(inodo->tamEnBytesLog==0){

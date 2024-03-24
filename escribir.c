@@ -5,7 +5,11 @@ int main(int argc,char const *argv[]){
     int offset[]={9000,209000,30725000,409605000,480000000};
     if(argc!=4){
         fprintf(stderr,RED"Sintaxis: escribir <nombre_dispositivo> <\"$(cat fichero)\"> <diferentes_inodos>\n"RESET);
-        fprintf(stderr,RED"Offsets: %d, %d, %d, %d, %d\n"RESET,offset[0],offset[1],offset[2],offset[3],offset[4]);
+        fprintf(stderr,RED"Offsets:"RESET);
+        for(int i=0;i<noffset-1;i++){
+            fprintf(stderr,RED" %d,"RESET,offset[i]);
+        }
+        fprintf(stderr,RED" %d\n"RESET,offset[noffset-1]);
         fprintf(stderr,RED"Si diferentes_inodos=0 se reserva un solo inodo para todos los offsets\n"RESET);
         return FALLO;
     }

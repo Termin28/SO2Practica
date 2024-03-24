@@ -5,9 +5,11 @@ int main(int argc,char **argv){
     if(argc!=2){
         fprintf(stderr,"Error: La sintaxis es incorrecta. Sintaxis: ./leer_sf <nombre_dispositivo>");
     }
+
     if(bmount(argv[1])==FALLO){
         return FALLO;
     }
+    
     struct superbloque SB;
     if(bread(posSB,&SB)==FALLO){
         return FALLO;

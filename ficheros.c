@@ -1,6 +1,12 @@
 //Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "ficheros.h"
 
+/**
+ * Función que escribe el contenido de un buffer de nbytes en un fichero/directorio
+ * Recibe: Nº inodo al que escribir el fichero, buffer con el contenido a escribir,
+ * posicion de escritura incial respecto al inodo (en bytes), Nº bytes a escribir
+ * Devuelve: Nº bytes escritos. En caso de error devuelve -1
+*/
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
     struct inodo inodo;
     if(leer_inodo(ninodo,&inodo)==FALLO){
@@ -20,6 +26,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     if(escribir_inodo(ninodo,&inodo)==FALLO){
         return FALLO;
     }
+
     if(nbfisico==FALLO){
         return FALLO;
     }
@@ -46,6 +53,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         escritos=aux-desp1;
         for(int i=primerBL+1;i<ultimoBL;i++){
             nbfisico=traducir_bloque_inodo(&inodo,i,1);
+
             if(escribir_inodo(ninodo,&inodo)==FALLO){
                 return FALLO;
             }
@@ -95,6 +103,12 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     return FALLO;
 }
 
+/**
+ * Función que lee información de un fichero/directorio y lo almacena en un buffer de memoria
+ * Recibe: Nº inodo que leer, buffer donde se almacenara la información leida,
+ * posicion de lectura incial respecto al inodo (en bytes), Nº bytes a leer
+ * Devuelve: Nº Bytes leidos. En caso de error devuelve -1
+*/
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes){
     struct inodo inodo;
     if(leer_inodo(ninodo,&inodo)==FALLO){
@@ -176,6 +190,11 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     return FALLO;
 }
 
+/**
+ * Función que devuelve la metainformacion de unf fichero/directorio
+ * Recibe: Nº inodo, puntero pasado por referencia de variable struct STAT
+ * Devuelve: 0 si todo va bien. En caso de error devuelve -1
+*/
 int mi_stat_f(unsigned int ninodo, struct STAT *p_stat){
     struct inodo inodo;
     if(leer_inodo(ninodo,&inodo)==FALLO){
@@ -193,6 +212,11 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat){
     return EXITO;
 }
 
+/**
+ * Función que cambia los permisos de un fichero/directorio
+ * Recibe: Nº Inodo, valor de los nuevos permisos
+ * Devuelve: 0 si todo va bien. En caso de error devuelve -1
+*/
 int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
     struct inodo inodo;
     if(leer_inodo(ninodo,&inodo)==FALLO){
@@ -206,6 +230,11 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
     return EXITO;
 }
 
+/**
+ * Función que trunca un fichero/directorio a los bytes indicados como nbytes, liberando los bloques necesarios
+ * Recibe: Nº inodo del fichero, Nº de bytes a partir del que truncar
+ * Devuelve: Bloques liberados. En caso de error devuelve -1
+*/
 int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
     struct inodo inodo;
     if(leer_inodo(ninodo,&inodo)==FALLO){

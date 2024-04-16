@@ -213,6 +213,20 @@ int mi_dir(const char *camino, char *buffer, char tipo){
             sprintf(tam,"%d",inodo.tamEnBytesLog);
             strcat(buffer,tam);
             strcat(buffer,"\t");
+
+            strcat(buffer,RED);
+            strcat(buffer,entradas[i%(BLOCKSIZE/sizeof(struct entrada))].nombre);
+            while((strlen(buffer)%TAMNOMBRE)){
+                strcat(buffer," ");
+            }
+            strcat(buffer,"\t");
+
+            strcat(buffer, RESET);
+            strcat(buffer, "\n");
+
+            if (leidos % (BLOCKSIZE / sizeof(struct entrada)) == 0){
+                leidos += mi_read_f(p_inodo, entradas, leidos, BLOCKSIZE);
+            }
         }
     }else{
         

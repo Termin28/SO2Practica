@@ -146,3 +146,75 @@ void mostrar_error_buscar_entrada(int error){
             break;
     }
 }
+
+int mi_creat(const char *camino, unsigned char permisos){
+    int p_inodo_dir=0;
+    int p_inodo=0;
+    int p_entrada=0;
+    int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,1,permisos);
+    if(error<0){
+        return error;
+    }
+    return EXITO;
+}
+
+int mi_dir(const char *camino, char *buffer, char tipo){
+    int p_inodo_dir=0;
+    int p_inodo=0;
+    int p_entrada=0;
+    int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
+    if(error<0){
+        mostrar_error_buscar_entrada(error);
+        return error;
+    }
+    struct inodo inodo;
+    if(leer_inodo(p_inodo,&inodo)==FALLO){
+        return FALLO;
+    }
+
+    if((inodo.permisos&4)!=4){
+        return FALLO;
+    }
+
+    char tmp[100];
+    char tam[10];
+    struct entrada entrada;
+    if(tipo=='d'){
+        struct entrada entradas[BLOCKSIZE/sizeof(struct entrada)];
+        memset(entradas,0,sizeof(struct entrada));
+        int leidos=mi_read_f(p_inodo,entradas,0,BLOCKSIZE);
+        for(int i=0;inodo.tamEnBytesLog/sizeof(struct entrada);i++){
+            if(leer_inodo(entradas[i%(BLOCKSIZE/sizeof(struct entrada))].ninodo,&inodo)==FALLO){
+                return FALLO;
+            }
+            if(inodo.tipo=='d'){
+                strcat(buffer,YELLOW);
+                strcat(buffer, "d");
+            }else{
+                strcat(buffer,BLUE);
+                strcat(buffer, "f"); 
+            }
+            strcat(buffer,"\t");
+
+            strcat(buffer,ORANGE);
+            if (inodo.permisos & 4) strcat(buffer, "r"); else strcat(buffer, "-");
+            if (inodo.permisos & 2) strcat(buffer, "w"); else strcat(buffer, "-");
+            if (inodo.permisos & 1) strcat(buffer, "x"); else strcat(buffer, "-");
+            strcat(buffer,"\t");
+
+            strcat(buffer,CYAN);
+            struct tm *tm; //ver info: struct tm
+            tm = localtime(&inodo.mtime);
+            sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,  tm->tm_sec);
+            strcat(buffer, tmp);
+            strcat(buffer,"\t");
+
+            strcat(buffer,GREEN);
+            sprintf(tam,"%d",inodo.tamEnBytesLog);
+            strcat(buffer,tam);
+            strcat(buffer,"\t");
+        }
+    }else{
+        
+    }
+}

@@ -5,8 +5,8 @@
 #define posSB 0 // el superbloque se escribe en el primer bloque de nuestro FS
 #define tamSB 1
 #define DEBUGN3 0
-#define DEBUGN4 1
-#define DEBUGN6 1
+#define DEBUGN4 0
+#define DEBUGN6 0
 
 #define NPUNTEROS (BLOCKSIZE / sizeof(unsigned int))   // 256 punteros por bloque
 #define DIRECTOS 12

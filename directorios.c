@@ -148,9 +148,9 @@ void mostrar_error_buscar_entrada(int error){
 }
 
 int mi_creat(const char *camino, unsigned char permisos){
-    int p_inodo_dir=0;
-    int p_inodo=0;
-    int p_entrada=0;
+    unsigned int p_inodo_dir=0;
+    unsigned int p_inodo=0;
+    unsigned int p_entrada=0;
     int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,1,permisos);
     if(error<0){
         return error;
@@ -159,12 +159,11 @@ int mi_creat(const char *camino, unsigned char permisos){
 }
 
 int mi_dir(const char *camino, char *buffer, char tipo){
-    int p_inodo_dir=0;
-    int p_inodo=0;
-    int p_entrada=0;
+    unsigned int p_inodo_dir=0;
+    unsigned int p_inodo=0;
+    unsigned int p_entrada=0;
     int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
     if(error<0){
-        mostrar_error_buscar_entrada(error);
         return error;
     }
     struct inodo inodo;
@@ -176,14 +175,18 @@ int mi_dir(const char *camino, char *buffer, char tipo){
         return FALLO;
     }
 
-    char tmp[100];
+    char tmp[TAMFILA];
     char tam[10];
     struct entrada entrada;
+    int nentradas=inodo.tamEnBytesLog/sizeof(struct entrada);
     if(tipo=='d'){
         struct entrada entradas[BLOCKSIZE/sizeof(struct entrada)];
         memset(entradas,0,sizeof(struct entrada));
         int leidos=mi_read_f(p_inodo,entradas,0,BLOCKSIZE);
-        for(int i=0;inodo.tamEnBytesLog/sizeof(struct entrada);i++){
+        if(leidos==FALLO){
+            return FALLO;
+        }
+        for(int i=0;i<nentradas;i++){
             if(leer_inodo(entradas[i%(BLOCKSIZE/sizeof(struct entrada))].ninodo,&inodo)==FALLO){
                 return FALLO;
             }
@@ -215,8 +218,8 @@ int mi_dir(const char *camino, char *buffer, char tipo){
             strcat(buffer,"\t");
 
             strcat(buffer,RED);
-            strcat(buffer,entradas[i%(BLOCKSIZE/sizeof(struct entrada))].nombre);
-            while((strlen(buffer)%TAMNOMBRE)){
+            strcat(buffer,entradas[i].nombre);
+            while((strlen(buffer)%TAMFILA)!=0){
                 strcat(buffer," ");
             }
             strcat(buffer,"\t");
@@ -229,6 +232,75 @@ int mi_dir(const char *camino, char *buffer, char tipo){
             }
         }
     }else{
-        
+        if(mi_read_f(p_inodo, &entrada, sizeof(entrada)*p_entrada, sizeof(struct entrada))==FALLO){
+            return FALLO;
+        }
+
+        if(leer_inodo(entrada.ninodo,&inodo)==FALLO){
+            return FALLO;
+        }
+
+        strcat(buffer,BLUE);
+        strcat(buffer, "f"); 
+            
+        strcat(buffer,"\t");
+
+        strcat(buffer,ORANGE);
+        if (inodo.permisos & 4) strcat(buffer, "r"); else strcat(buffer, "-");
+        if (inodo.permisos & 2) strcat(buffer, "w"); else strcat(buffer, "-");
+        if (inodo.permisos & 1) strcat(buffer, "x"); else strcat(buffer, "-");
+        strcat(buffer,"\t");
+
+        strcat(buffer,CYAN);
+        struct tm *tm; //ver info: struct tm
+        tm = localtime(&inodo.mtime);
+        sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,  tm->tm_sec);
+        strcat(buffer, tmp);
+        strcat(buffer,"\t");
+
+        strcat(buffer,GREEN);
+        sprintf(tam,"%d",inodo.tamEnBytesLog);
+        strcat(buffer,tam);
+        strcat(buffer,"\t");
+
+        strcat(buffer,RED);
+        strcat(buffer,entrada.nombre);
+        while((strlen(buffer)%TAMFILA)!=0){
+            strcat(buffer," ");
+        }
+        strcat(buffer,"\t");
+
+        strcat(buffer, RESET);
+        strcat(buffer, "\n");
     }
+    return nentradas;
+}
+
+int mi_chmod(const char *camino, unsigned char permisos){
+    unsigned int p_inodo_dir=0;
+    unsigned int p_inodo=0;
+    unsigned int p_entrada=0;
+    int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,permisos);
+    if(error<0){
+        return error;
+    }
+    if(mi_chmod_f(p_inodo,permisos)==FALLO){
+        return FALLO;
+    }
+    return EXITO;
+}
+
+int mi_stat(const char *camino, struct STAT *p_stat){
+    unsigned int p_inodo_dir=0;
+    unsigned int p_inodo=0;
+    unsigned int p_entrada=0;
+    int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,p_stat->permisos);
+    if(error<0){
+        return error;
+    }
+
+    if(mi_stat_f(p_inodo,p_stat)==FALLO){
+        return FALLO;
+    }
+    return p_inodo;
 }

@@ -12,6 +12,8 @@
 #define TAMFILA 100
 #define TAMBUFFER (TAMFILA*1000)
 
+#define DEBUGN7 1
+
 struct entrada {
   char nombre[TAMNOMBRE];
   unsigned int ninodo;

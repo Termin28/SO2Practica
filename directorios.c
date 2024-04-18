@@ -46,14 +46,17 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     if(extraer_camino(camino_parcial,inicial,final,&tipo)==FALLO){
         return ERROR_CAMINO_INCORRECTO;
     }
-
-    fprintf(stderr,GRAY"[buscar_entrada()->inicial: %s, final: %s, reservar: %d]\n"RESET, inicial, final, reservar);
-
+    #if DEBUGN7
+        fprintf(stderr,GRAY"[buscar_entrada()->inicial: %s, final: %s, reservar: %d]\n"RESET, inicial, final, reservar);
+    #endif
     if(leer_inodo(*p_inodo_dir,&inodo_dir)==FALLO){
         return FALLO;
     }
 
     if((inodo_dir.permisos&4)!=4){
+        #if DEBUGN7
+            fprintf(stderr,"[buscar_entrada()->El inodo %d no tiene permisos de lectura]\n",*p_inodo_dir);
+        #endif
         return ERROR_PERMISO_LECTURA;
     }
 
@@ -82,19 +85,23 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
                     return ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO;
                 }
                 if((inodo_dir.permisos&2)!=2){
-                    return ERROR_PERMISO_LECTURA;
+                    return ERROR_PERMISO_ESCRITURA;
                 }else{
                     strcpy(entrada.nombre,inicial);
                     if(tipo=='d'){
                         if(strcmp(final,"/")==0){
                             entrada.ninodo=reservar_inodo('d',permisos);
-                            fprintf(stderr,GRAY"[buscar_entrada()->reservado inodo: %d tipo %c con permisos %d para '%s']\n"RESET, entrada.ninodo, tipo, permisos, entrada.nombre);
+                            #if DEBUGN7
+                                fprintf(stderr,GRAY"[buscar_entrada()->reservado inodo: %d tipo %c con permisos %d para '%s']\n"RESET, entrada.ninodo, tipo, permisos, entrada.nombre);
+                            #endif
                         }else{
                             return ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO;
                         }
                     }else{
                         entrada.ninodo=reservar_inodo('f',permisos);
-                        fprintf(stderr,GRAY"[buscar_entrada()->reservado inodo: %d tipo %c con permisos %d para '%s']\n"RESET, entrada.ninodo, tipo, permisos, entrada.nombre);
+                        #if DEBUGN7
+                            fprintf(stderr,GRAY"[buscar_entrada()->reservado inodo: %d tipo %c con permisos %d para '%s']\n"RESET, entrada.ninodo, tipo, permisos, entrada.nombre);
+                        #endif
                     }
                     fprintf(stderr,GRAY"[buscar_entrada()->creada entrada: %s, %d] \n"RESET, inicial, entrada.ninodo);
                     if(mi_write_f(*p_inodo_dir,&entrada,num_entrada_inodo*sizeof(struct entrada),sizeof(struct entrada))==FALLO){
@@ -176,7 +183,7 @@ int mi_dir(const char *camino, char *buffer, char tipo){
     }
 
     char tmp[TAMFILA];
-    char tam[10];
+    char tam[TAMFILA];
     struct entrada entrada;
     int nentradas=inodo.tamEnBytesLog/sizeof(struct entrada);
     if(tipo=='d'){
@@ -187,37 +194,37 @@ int mi_dir(const char *camino, char *buffer, char tipo){
             return FALLO;
         }
         for(int i=0;i<nentradas;i++){
-            if(leer_inodo(entradas[i%(BLOCKSIZE/sizeof(struct entrada))].ninodo,&inodo)==FALLO){
+            if(leer_inodo(entradas[i].ninodo,&inodo)==FALLO){
                 return FALLO;
             }
             if(inodo.tipo=='d'){
-                strcat(buffer,YELLOW);
                 strcat(buffer, "d");
             }else{
-                strcat(buffer,BLUE);
                 strcat(buffer, "f"); 
             }
             strcat(buffer,"\t");
 
-            strcat(buffer,ORANGE);
             if (inodo.permisos & 4) strcat(buffer, "r"); else strcat(buffer, "-");
             if (inodo.permisos & 2) strcat(buffer, "w"); else strcat(buffer, "-");
             if (inodo.permisos & 1) strcat(buffer, "x"); else strcat(buffer, "-");
             strcat(buffer,"\t");
 
-            strcat(buffer,CYAN);
             struct tm *tm; //ver info: struct tm
             tm = localtime(&inodo.mtime);
             sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,  tm->tm_sec);
             strcat(buffer, tmp);
             strcat(buffer,"\t");
 
-            strcat(buffer,GREEN);
             sprintf(tam,"%d",inodo.tamEnBytesLog);
             strcat(buffer,tam);
             strcat(buffer,"\t");
 
-            strcat(buffer,RED);
+            if(inodo.tipo=='d'){
+                strcat(buffer,ORANGE);
+            }else{
+                strcat(buffer,BLUE);
+            }
+            
             strcat(buffer,entradas[i].nombre);
             while((strlen(buffer)%TAMFILA)!=0){
                 strcat(buffer," ");
@@ -238,30 +245,25 @@ int mi_dir(const char *camino, char *buffer, char tipo){
             return FALLO;
         }
 
-        strcat(buffer,BLUE);
-        strcat(buffer, "f"); 
-            
+        strcat(buffer, "f");  
         strcat(buffer,"\t");
 
-        strcat(buffer,ORANGE);
         if (inodo.permisos & 4) strcat(buffer, "r"); else strcat(buffer, "-");
         if (inodo.permisos & 2) strcat(buffer, "w"); else strcat(buffer, "-");
         if (inodo.permisos & 1) strcat(buffer, "x"); else strcat(buffer, "-");
         strcat(buffer,"\t");
 
-        strcat(buffer,CYAN);
         struct tm *tm; //ver info: struct tm
         tm = localtime(&inodo.mtime);
         sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,  tm->tm_sec);
         strcat(buffer, tmp);
         strcat(buffer,"\t");
 
-        strcat(buffer,GREEN);
         sprintf(tam,"%d",inodo.tamEnBytesLog);
         strcat(buffer,tam);
         strcat(buffer,"\t");
 
-        strcat(buffer,RED);
+        strcat(buffer,BLUE);
         strcat(buffer,entrada.nombre);
         while((strlen(buffer)%TAMFILA)!=0){
             strcat(buffer," ");

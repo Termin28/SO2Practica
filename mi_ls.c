@@ -3,7 +3,7 @@
 
 int main(int argc,char const *argv[]){
     if(argc<3 || argc>4){
-        fprintf(stderr,"Error: La sintaxis es incorrecta. Sintaxis: ./mi_ls <disco> </ruta> o ./mi_ls -l <disco> </ruta>\n");
+        fprintf(stderr,RED"Error: La sintaxis es incorrecta. Sintaxis: ./mi_ls <disco> </ruta> o ./mi_ls -l <disco> </ruta>\n"RESET);
         return FALLO;
     }
 
@@ -24,19 +24,28 @@ int main(int argc,char const *argv[]){
     int nentradas;
     if(camino[strlen(camino)-1]!='/'){
         nentradas=mi_dir(camino,buffer,'f');
-    }else{
-        nentradas=mi_dir(camino,buffer,'d');
-    }
-    if(nentradas<0){
-        mostrar_error_buscar_entrada(nentradas);
-        return FALLO;
-    }
-    printf("Total: %d\n",nentradas);
-    if(nentradas!=0){
+        if(nentradas<0){
+            mostrar_error_buscar_entrada(nentradas);
+            return FALLO;
+        }
         printf("Tipo\tPermisos\tmTime\t\tTamaño\tNombre\n");
         printf("---------------------------------------------------------------------------------------------\n");
         printf("%s\n",buffer);
+    }else{
+        nentradas=mi_dir(camino,buffer,'d');
+            if(nentradas<0){
+            mostrar_error_buscar_entrada(nentradas);
+            return FALLO;
+        }
+        printf("Total: %d\n",nentradas);
+        if(nentradas!=0){
+            printf("Tipo\tPermisos\tmTime\t\tTamaño\tNombre\n");
+            printf("---------------------------------------------------------------------------------------------\n");
+            printf("%s\n",buffer);
+        }
     }
+    
+    
     if(bumount()==FALLO){
         return FALLO;
     }

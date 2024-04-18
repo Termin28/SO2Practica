@@ -9,7 +9,7 @@ int main(int argc,char const *argv[]){
 
     int permisos=atoi(argv[2]);
     if(permisos<0 || permisos>7){
-        fprintf(stderr,"Error: Los permisos deben ser un numero entre 0-7\n");
+        fprintf(stderr,RED"Error: modo invalido <<%d>>\n"RESET,permisos);
         return FALLO;
     }
 

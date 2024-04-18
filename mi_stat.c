@@ -33,9 +33,9 @@ int main(int argc,char const *argv[]){
     printf("Nº Inodo: %d\n",error);
     printf("tipo: %c\n",stat.tipo);
     printf("permisos: %d\n",stat.permisos);
-    printf("atime: %ld\n",stat.atime);
-    printf("ctime: %ld\n",stat.ctime);
-    printf("mtime: %ld\n",stat.mtime);
+    printf("atime: %s\n",atime);
+    printf("ctime: %s\n",ctime);
+    printf("mtime: %s\n",mtime);
     printf("nlinks: %d\n",stat.nlinks);
     printf("tamEnBytesLog: %d\n",stat.tamEnBytesLog);
     printf("numBloquesOcupados: %d\n",stat.numBloquesOcupados);

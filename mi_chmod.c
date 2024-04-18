@@ -3,13 +3,13 @@
 
 int main(int argc,char const *argv[]){
     if(argc!=4){
-        fprintf(stderr,"Error: La sintaxis es incorrecta. Sintaxis: ./mi_chmod <disco> <permisos> </ruta>\n");
+        fprintf(stderr,RED"Error: La sintaxis es incorrecta. Sintaxis: ./mi_chmod <disco> <permisos> </ruta>\n"RESET);
         return FALLO;
     }
 
     int permisos=atoi(argv[2]);
     if(permisos<0 || permisos>7){
-        fprintf(stderr,"Error: Los permisos deben ser un numero entre 0-7\n");
+        fprintf(stderr,RED"Error: modo invalido <<%d>>\n"RESET,permisos);
         return FALLO;
     }
 

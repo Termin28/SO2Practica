@@ -222,8 +222,6 @@ int mi_dir(const char *camino, char *buffer, char tipo){
             while((strlen(buffer)%TAMFILA)!=0){
                 strcat(buffer," ");
             }
-            strcat(buffer,"\t");
-
             strcat(buffer, RESET);
             strcat(buffer, "\n");
 
@@ -232,7 +230,7 @@ int mi_dir(const char *camino, char *buffer, char tipo){
             }
         }
     }else{
-        if(mi_read_f(p_inodo, &entrada, sizeof(entrada)*p_entrada, sizeof(struct entrada))==FALLO){
+        if(mi_read_f(p_inodo_dir, &entrada, sizeof(entrada)*p_entrada, sizeof(struct entrada))==FALLO){
             return FALLO;
         }
 
@@ -268,8 +266,6 @@ int mi_dir(const char *camino, char *buffer, char tipo){
         while((strlen(buffer)%TAMFILA)!=0){
             strcat(buffer," ");
         }
-        strcat(buffer,"\t");
-
         strcat(buffer, RESET);
         strcat(buffer, "\n");
     }

@@ -498,10 +498,14 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
         inodo->ctime=time(NULL);
         if(nRangoBL==0){
             inodo->punterosDirectos[nblogico]=ptr;
-            fprintf(stderr,GRAY"[traducir_bloque_inodo()→ inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n"RESET,nblogico,ptr,ptr,nblogico);
+            #if DEBUGN4
+                fprintf(stderr,GRAY"[traducir_bloque_inodo()→ inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n"RESET,nblogico,ptr,ptr,nblogico);
+            #endif
         }else{
             buffer[indice]=ptr;
-            fprintf(stderr,GRAY"[traducir_bloque_inodo()→ punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n"RESET,indice,ptr,ptr,nblogico);
+            #if DEBUGN4
+                fprintf(stderr,GRAY"[traducir_bloque_inodo()→ punteros_nivel1 [%d] = %d (reservado BF %d para BL %d)]\n"RESET,indice,ptr,ptr,nblogico);
+            #endif
             if(bwrite(ptr_ant,buffer)==FALLO){
                 return FALLO;
             }

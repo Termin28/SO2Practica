@@ -1,5 +1,7 @@
 #include "directorios.h"
 
+static struct UltimaEntrada UltimaEntradaEscritura;
+
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
     if(camino[0]!='/'){
         return FALLO;
@@ -301,4 +303,25 @@ int mi_stat(const char *camino, struct STAT *p_stat){
         return FALLO;
     }
     return p_inodo;
+}
+
+int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes){
+    unsigned int p_inodo_dir=0;
+    unsigned int p_inodo=0;
+    unsigned int p_entrada=0;
+    if(strcmp(UltimaEntradaEscritura.camino, camino) == 0){
+        p_inodo=UltimaEntradaEscritura.p_inodo;
+    }else{
+        int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
+        if(error<0){
+            return error;
+        }
+        UltimaEntradaEscritura.p_inodo=p_inodo;
+        strcpy(UltimaEntradaEscritura.camino,camino);
+    }
+    int escritos=mi_write_f(p_inodo, buf, offset, nbytes);
+    if(escritos<0){
+        return FALLO;
+    }
+    return escritos;
 }

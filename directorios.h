@@ -15,7 +15,7 @@
 #define TAMNOMBRE 60 //tamaño del nombre de directorio o fichero
 #define PROFUNDIDAD 32 //profundidad máxima del árbol de directorios
 
-#define DEBUGN7 1
+#define DEBUGN7 0
 
 struct entrada {
   char nombre[TAMNOMBRE];
@@ -36,5 +36,6 @@ int mi_dir(const char *camino, char *buffer, char tipo);
 int mi_chmod(const char *camino, unsigned char permisos);
 int mi_stat(const char *camino, struct STAT *p_stat);
 int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes);
+int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes);
 
 

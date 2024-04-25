@@ -4,7 +4,7 @@
 
 int main(int argc,char const *argv[]){
     if(argc!=3){
-        fprintf(stderr,"Error: La sintaxis es incorrecta. Sintaxis: ./leer <nombre_dispositivo> <ninodo>");
+        fprintf(stderr,RED"Error: La sintaxis es incorrecta. Sintaxis: ./leer <nombre_dispositivo> <ninodo>"RESET);
         return FALLO;
     }
     

@@ -157,7 +157,7 @@ int main(int argc,char **argv){
     printf("numBloquesOcupados: %d\n",inodo.numBloquesOcupados);
     printf("\nSB.posPrimerInodoLibre = %d\n",SB.posPrimerInodoLibre);
     */
-
+   /*
     mostrar_buscar_entrada("pruebas/", 1); //ERROR_CAMINO_INCORRECTO
     mostrar_buscar_entrada("/pruebas/", 0); //ERROR_NO_EXISTE_ENTRADA_CONSULTA
     mostrar_buscar_entrada("/pruebas/docs/", 1); //ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO
@@ -171,5 +171,5 @@ int main(int argc,char **argv){
     mostrar_buscar_entrada("/pruebas/docs/doc1", 1); //ERROR_ENTRADA_YA_EXISTENTE
     mostrar_buscar_entrada("/pruebas/casos/", 1); //creamos /pruebas/casos/
     mostrar_buscar_entrada("/pruebas/docs/doc2", 1); //creamos /pruebas/docs/doc2
-
+*/
 }

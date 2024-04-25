@@ -1,6 +1,7 @@
 #include "directorios.h"
 
-static struct UltimaEntrada UltimaEntradaEscritura;
+int disponible=CACHE_SIZE;
+static struct UltimaEntrada UltimasEntradas[CACHE_SIZE];
 
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
     if(camino[0]!='/'){
@@ -309,16 +310,35 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     unsigned int p_inodo_dir=0;
     unsigned int p_inodo=0;
     unsigned int p_entrada=0;
-    if(strcmp(UltimaEntradaEscritura.camino, camino) == 0){
-        p_inodo=UltimaEntradaEscritura.p_inodo;
-    }else{
+    int existe=0;
+    for(int i=0;i<disponible-1;i++){
+        if(strcmp(UltimasEntradas[i].camino, camino) == 0){
+            p_inodo=UltimasEntradas[i].p_inodo;
+            existe=1;
+            break;
+        }
+    }
+    if(!existe){
         int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
         if(error<0){
             return error;
         }
-        UltimaEntradaEscritura.p_inodo=p_inodo;
-        strcpy(UltimaEntradaEscritura.camino,camino);
+        if(disponible>0){
+            strcpy(UltimasEntradas[CACHE_SIZE-disponible].camino,camino);
+            UltimasEntradas[CACHE_SIZE-disponible].p_inodo=p_inodo;
+            disponible--;
+            fprintf(stderr,ORANGE"[mi_write() → Actualizamos la caché de escritura]\n"RESET);
+        }else{
+            for(int i=0;i<CACHE_SIZE-1;i++){
+                strcpy(UltimasEntradas[i].camino,UltimasEntradas[i+1].camino);
+                UltimasEntradas[i].p_inodo=UltimasEntradas[i+1].p_inodo;
+            }
+            strcpy(UltimasEntradas[CACHE_SIZE-1].camino,camino);
+            UltimasEntradas[CACHE_SIZE-1].p_inodo=p_inodo;
+            fprintf(stderr,ORANGE"[mi_write() → Actualizamos la caché de escritura]\n"RESET);
+        }
     }
+    
     int escritos=mi_write_f(p_inodo, buf, offset, nbytes);
     if(escritos<0){
         return FALLO;
@@ -330,12 +350,33 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
     unsigned int p_inodo_dir=0;
     unsigned int p_inodo=0;
     unsigned int p_entrada=0;
-    if(strcmp(UltimaEntradaEscritura.camino, camino) == 0){
-        p_inodo=UltimaEntradaEscritura.p_inodo;
-    }else{
+    int existe=0;
+    for(int i=0;i<disponible-1;i++){
+        if(strcmp(UltimasEntradas[i].camino, camino) == 0){
+            p_inodo=UltimasEntradas[i].p_inodo;
+            existe=1;
+            fprintf(stderr,ORANGE"[mi_read() → Utilizamos la caché de lectura en vez de llamar a buscar_entrada()]\n"RESET);
+            break;
+        }
+    }
+    if(!existe){
         int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
         if(error<0){
             return error;
+        }
+        if(disponible>0){
+            strcpy(UltimasEntradas[CACHE_SIZE-disponible].camino,camino);
+            UltimasEntradas[CACHE_SIZE-disponible].p_inodo=p_inodo;
+            disponible--;
+            fprintf(stderr,ORANGE"[mi_read() → Actualizamos la cache de lectura]\n"RESET);
+        }else{
+            for(int i=0;i<CACHE_SIZE-1;i++){
+                strcpy(UltimasEntradas[i].camino,UltimasEntradas[i+1].camino);
+                UltimasEntradas[i].p_inodo=UltimasEntradas[i+1].p_inodo;
+            }
+            strcpy(UltimasEntradas[CACHE_SIZE-1].camino,camino);
+            UltimasEntradas[CACHE_SIZE-1].p_inodo=p_inodo;
+            fprintf(stderr,ORANGE"[mi_read() → Actualizamos la cache de lectura]\n"RESET);
         }
     }
     int leidos=mi_read_f(p_inodo,buf,offset,nbytes);

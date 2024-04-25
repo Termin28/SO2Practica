@@ -22,10 +22,18 @@ struct entrada {
   unsigned int ninodo;
 };
 
+#define USARCACHE 3 //0:sin caché, 1: última L/E, 2:tabla FIFO, 3:tabla LRU
+#define CACHE_SIZE 3
+
 struct UltimaEntrada{
-  char camino [TAMNOMBRE*PROFUNDIDAD];
-  int p_inodo;
+   char camino [TAMNOMBRE*PROFUNDIDAD];
+   int p_inodo;
+  #if USARCACHE==3 // tabla LRU
+      //struct timeval ultima_consulta;
+  #endif
 };
+
+
 
 
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo);

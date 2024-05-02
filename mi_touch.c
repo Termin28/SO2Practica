@@ -26,6 +26,8 @@ int main(int argc,char const *argv[]){
         if(bumount()==FALLO){
             return FALLO;
         }
+    }else{
+        fprintf(stderr,RED"CHECK NO\n"RESET);
     }
     
     

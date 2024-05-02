@@ -1,6 +1,6 @@
 #include "directorios.h"
 
-int disponible=CACHE_SIZE;
+int indicecache=0;
 static struct UltimaEntrada UltimasEntradas[CACHE_SIZE];
 
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
@@ -106,7 +106,9 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
                             fprintf(stderr,GRAY"[buscar_entrada()->reservado inodo: %d tipo %c con permisos %d para '%s']\n"RESET, entrada.ninodo, tipo, permisos, entrada.nombre);
                         #endif
                     }
-                    fprintf(stderr,GRAY"[buscar_entrada()->creada entrada: %s, %d] \n"RESET, inicial, entrada.ninodo);
+                    #if DEBUGN7
+                        fprintf(stderr,GRAY"[buscar_entrada()->creada entrada: %s, %d] \n"RESET, inicial, entrada.ninodo);
+                    #endif
                     if(mi_write_f(*p_inodo_dir,&entrada,num_entrada_inodo*sizeof(struct entrada),sizeof(struct entrada))==FALLO){
                         if(entrada.ninodo!=FALLO){
                             liberar_inodo(entrada.ninodo);
@@ -311,8 +313,15 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     unsigned int p_inodo=0;
     unsigned int p_entrada=0;
     int existe=0;
-    for(int i=0;i<disponible-1;i++){
+    indicecache=indicecache%3;
+    for(int i=0;i<CACHE_SIZE;i++){
         if(strcmp(UltimasEntradas[i].camino, camino) == 0){
+            #if DEBUGN9==2
+                fprintf(stderr,BLUE"Utilizamos cache[%d]: %s\n"RESET,i,camino);
+            #endif
+            #if DEBUGN9
+                fprintf(stderr,BLUE"[mi_write() → Utilizamos la caché de escritura en vez de llamar a buscar_entrada()]\n"RESET);
+            #endif
             p_inodo=UltimasEntradas[i].p_inodo;
             existe=1;
             break;
@@ -323,20 +332,15 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
         if(error<0){
             return error;
         }
-        if(disponible>0){
-            strcpy(UltimasEntradas[CACHE_SIZE-disponible].camino,camino);
-            UltimasEntradas[CACHE_SIZE-disponible].p_inodo=p_inodo;
-            disponible--;
+        strcpy(UltimasEntradas[indicecache].camino,camino);
+        UltimasEntradas[indicecache].p_inodo=p_inodo;
+        #if DEBUGN9==2
+            fprintf(stderr,ORANGE"Reemplazamos la cache[%d]: %s\n"RESET,indicecache,camino);
+        #endif
+        #if DEBUGN9
             fprintf(stderr,ORANGE"[mi_write() → Actualizamos la caché de escritura]\n"RESET);
-        }else{
-            for(int i=0;i<CACHE_SIZE-1;i++){
-                strcpy(UltimasEntradas[i].camino,UltimasEntradas[i+1].camino);
-                UltimasEntradas[i].p_inodo=UltimasEntradas[i+1].p_inodo;
-            }
-            strcpy(UltimasEntradas[CACHE_SIZE-1].camino,camino);
-            UltimasEntradas[CACHE_SIZE-1].p_inodo=p_inodo;
-            fprintf(stderr,ORANGE"[mi_write() → Actualizamos la caché de escritura]\n"RESET);
-        }
+        #endif
+        indicecache++;
     }
     
     int escritos=mi_write_f(p_inodo, buf, offset, nbytes);
@@ -350,12 +354,13 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
     unsigned int p_inodo_dir=0;
     unsigned int p_inodo=0;
     unsigned int p_entrada=0;
+    indicecache=indicecache%3;
     int existe=0;
-    for(int i=0;i<disponible-1;i++){
+    for(int i=0;i<CACHE_SIZE;i++){
         if(strcmp(UltimasEntradas[i].camino, camino) == 0){
             p_inodo=UltimasEntradas[i].p_inodo;
             existe=1;
-            fprintf(stderr,ORANGE"[mi_read() → Utilizamos la caché de lectura en vez de llamar a buscar_entrada()]\n"RESET);
+            fprintf(stderr,BLUE"\n[mi_read() → Utilizamos la caché de lectura en vez de llamar a buscar_entrada()]\n"RESET);
             break;
         }
     }
@@ -364,24 +369,123 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
         if(error<0){
             return error;
         }
-        if(disponible>0){
-            strcpy(UltimasEntradas[CACHE_SIZE-disponible].camino,camino);
-            UltimasEntradas[CACHE_SIZE-disponible].p_inodo=p_inodo;
-            disponible--;
-            fprintf(stderr,ORANGE"[mi_read() → Actualizamos la cache de lectura]\n"RESET);
-        }else{
-            for(int i=0;i<CACHE_SIZE-1;i++){
-                strcpy(UltimasEntradas[i].camino,UltimasEntradas[i+1].camino);
-                UltimasEntradas[i].p_inodo=UltimasEntradas[i+1].p_inodo;
-            }
-            strcpy(UltimasEntradas[CACHE_SIZE-1].camino,camino);
-            UltimasEntradas[CACHE_SIZE-1].p_inodo=p_inodo;
-            fprintf(stderr,ORANGE"[mi_read() → Actualizamos la cache de lectura]\n"RESET);
-        }
+        strcpy(UltimasEntradas[indicecache].camino,camino);
+        UltimasEntradas[indicecache].p_inodo=p_inodo;
+        fprintf(stderr,ORANGE"\n[mi_read() → Actualizamos la cache de lectura]\n"RESET);
+    
     }
     int leidos=mi_read_f(p_inodo,buf,offset,nbytes);
     if(leidos<0){
         return FALLO;
     }
     return leidos;
+}
+
+int mi_link(const char *camino1, const char *camino2){
+    unsigned int p_inodo_dir1=0;
+    unsigned int p_inodo1=0;
+    unsigned int p_entrada1=0;
+    int error=buscar_entrada(camino1,&p_inodo_dir1,&p_inodo1,&p_entrada1,0,4);
+    if(error<0){
+        mostrar_error_buscar_entrada(error);
+        return error;
+    }
+    struct inodo inodo;
+    if(leer_inodo(p_inodo1,&inodo)==FALLO){
+        return FALLO;
+    }
+    if(inodo.tipo!='f'){
+        //FICHERO
+        return FALLO;
+    }
+    if((inodo.permisos&4)!=4){
+        return FALLO;
+    }
+
+    unsigned int p_inodo_dir2=0;
+    unsigned int p_inodo2=0;
+    unsigned int p_entrada2=0;
+    error=buscar_entrada(camino2,&p_inodo_dir2,&p_inodo2,&p_entrada2,1,6);
+    if(error<0){
+        mostrar_error_buscar_entrada(error);
+        return error;
+    }
+    struct entrada entrada2;
+    if(mi_read_f(p_inodo_dir2,&entrada2,sizeof(struct entrada)*p_entrada2,sizeof(struct entrada))==FALLO){
+        return FALLO;
+    }
+    entrada2.ninodo=p_inodo1;
+    if(mi_write_f(p_inodo_dir2,&entrada2,sizeof(struct entrada)*p_entrada2,sizeof(struct entrada))==FALLO){
+        return FALLO;
+    }
+    if(liberar_inodo(p_inodo2)==FALLO){
+        return FALLO;
+    }
+    inodo.nlinks++;
+    inodo.ctime=time(NULL);
+    if(escribir_inodo(p_inodo1,&inodo)==FALLO){
+        return FALLO;
+    }
+    return EXITO;
+}
+
+int mi_unlink(const char *camino){
+
+    struct superbloque SB;
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+
+    unsigned int p_inodo_dir=SB.posInodoRaiz;
+    unsigned int p_inodo=SB.posInodoRaiz;
+    unsigned int p_entrada=0;
+    int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
+    if(error<0){
+        mostrar_error_buscar_entrada(error);
+        return error;
+    }
+    if(SB.posInodoRaiz==p_inodo){
+        return FALLO;
+    }
+    struct inodo inodo;
+    if(leer_inodo(p_inodo,&inodo)==FALLO){
+        return FALLO;
+    }
+    if(inodo.tamEnBytesLog>0 && inodo.tipo=='d'){
+        return FALLO;
+    }
+
+    struct inodo inodo_dir;
+    if(leer_inodo(p_inodo_dir,&inodo_dir)==FALLO){
+        return FALLO;
+    }
+    int nentradas=inodo_dir.tamEnBytesLog/sizeof(struct entrada);
+    if(p_entrada==(nentradas-1)){
+        if(mi_truncar_f(p_inodo_dir,sizeof(struct entrada)*(nentradas-1))==FALLO){
+            return FALLO;
+        }
+    }else{
+        struct entrada entrada;
+        if(mi_read_f(p_inodo_dir,&entrada,sizeof(struct entrada)*(nentradas-1),sizeof(struct entrada))==FALLO){
+            return FALLO;
+        }
+        if(mi_write_f(p_inodo_dir,&entrada,sizeof(struct entrada)*(p_entrada),sizeof(struct entrada))==FALLO){
+            return FALLO;
+        }
+        if(mi_truncar_f(p_inodo_dir,sizeof(struct entrada)*(nentradas-1))==FALLO){
+            return FALLO;
+        }
+    }
+    inodo.nlinks--;
+    if(inodo.nlinks==0){
+        if(liberar_inodo(p_inodo)==FALLO){
+            return FALLO;
+        }
+    }else{
+        inodo.ctime=time(NULL);
+        if(escribir_inodo(p_inodo,&inodo)==FALLO){
+            return FALLO;
+        }
+    }
+    return EXITO;
 }

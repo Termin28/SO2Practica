@@ -26,7 +26,5 @@ int main(int argc,char const *argv[]){
         if(bumount()==FALLO){
             return FALLO;
         }
-    }
-    
-    
+    }   
 }

@@ -7,9 +7,6 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
     if(camino[0]!='/'){
         return FALLO;
     }
-    char aux[strlen(camino)];
-    strcpy(aux,camino);
-    char *token=strtok(aux,"/");
 
     char *resto=strchr(camino+1,'/');
     if(resto==NULL){
@@ -18,7 +15,7 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
         strcpy(tipo,"f");
     }else{
         strcpy(final,resto);
-        strcpy(inicial,token);
+        strncpy(inicial,camino+1,strlen(camino) - strlen(resto) - 1);
         strcpy(tipo,"d");
     }
     return EXITO;
@@ -36,16 +33,14 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     memset(inicial,0,sizeof(entrada.nombre));
     memset(final,0,strlen(camino_parcial));
 
-    if(bread(posSB,&SB)==FALLO){
-        return FALLO;
-    }
-
     if(strcmp(camino_parcial,"/")==0){
+        if(bread(posSB,&SB)==FALLO){
+            return FALLO;
+        }
         *p_inodo=SB.posInodoRaiz;
         *p_entrada=0;
         return EXITO;
     }
-
     if(extraer_camino(camino_parcial,inicial,final,&tipo)==FALLO){
         return ERROR_CAMINO_INCORRECTO;
     }
@@ -55,7 +50,6 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     if(leer_inodo(*p_inodo_dir,&inodo_dir)==FALLO){
         return FALLO;
     }
-
     if((inodo_dir.permisos&4)!=4){
         #if DEBUGN7
             fprintf(stderr,"[buscar_entrada()->El inodo %d no tiene permisos de lectura]\n",*p_inodo_dir);
@@ -78,7 +72,6 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
             }
         }
     }
-
     if((strcmp(inicial,entrada.nombre)!=0)&&(num_entrada_inodo==cant_entradas_inodo)){
         switch(reservar){
             case 0:
@@ -118,7 +111,6 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
                 }
         }
     }
-
     if((strcmp(final,"/")==0)||(strcmp(final,"")==0)){
         if((num_entrada_inodo<cant_entradas_inodo)&&(reservar==1)){
             return ERROR_ENTRADA_YA_EXISTENTE;

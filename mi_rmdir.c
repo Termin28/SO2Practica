@@ -2,12 +2,12 @@
 
 int main(int argc,char const *argv[]){
     if(argc!=3){
-        fprintf(stderr,RED"Error: La sintaxis es incorrecta. Sintaxis: ./mi_rm disco /ruta"RESET);
+        fprintf(stderr,RED"Error: La sintaxis es incorrecta. Sintaxis: ./mi_rmdir disco /ruta"RESET);
         return FALLO;
     }
 
-    if(argv[2][strlen(argv[2])-1]=='/'){
-        fprintf(stderr,RED"Error: No es un fichero valido"RESET);
+    if(argv[2][strlen(argv[2])-1]!='/'){
+        fprintf(stderr,RED"Error: No es un directorio valido"RESET);
         return FALLO;
     }
     

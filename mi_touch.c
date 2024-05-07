@@ -12,23 +12,18 @@ int main(int argc,char const *argv[]){
         fprintf(stderr,RED"Error: modo invalido <<%d>>\n"RESET,permisos);
         return FALLO;
     }
-
     if(argv[3][strlen(argv[3])-1]!='/'){
         if(bmount(argv[1])==FALLO){
             return FALLO;
         }
+        
         int error=mi_creat(argv[3],permisos);
         if(error<0){
             mostrar_error_buscar_entrada(error);
             return FALLO;
         }
-        
         if(bumount()==FALLO){
             return FALLO;
         }
-    }else{
-        fprintf(stderr,RED"CHECK NO\n"RESET);
     }
-    
-    
 }

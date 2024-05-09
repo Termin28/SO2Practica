@@ -3,6 +3,9 @@
 int indicecache=0;
 static struct UltimaEntrada UltimasEntradas[CACHE_SIZE];
 
+/**
+ * Función para extraer el
+*/
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
     if(camino[0]!='/'){
         return FALLO;
@@ -168,6 +171,7 @@ int mi_dir(const char *camino, char *buffer, char tipo){
     unsigned int p_entrada=0;
     int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
     if(error<0){
+        mostrar_error_buscar_entrada(error);
         return error;
     }
     struct inodo inodo;
@@ -447,6 +451,7 @@ int mi_unlink(const char *camino){
         return FALLO;
     }
     if(inodo.tamEnBytesLog>0 && inodo.tipo=='d'){
+        fprintf(stderr,RED"El directorio %s no esta vacio\n"RESET,camino);
         return FALLO;
     }
 

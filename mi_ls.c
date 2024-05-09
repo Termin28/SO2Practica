@@ -52,7 +52,7 @@ int main(int argc,char const *argv[]){
             printf("%s\n",buffer);
         }else{
             nentradas=mi_dir(camino,buffer,'d');
-                if(nentradas<0){
+            if(nentradas<0){
                 mostrar_error_buscar_entrada(nentradas);
                 return FALLO;
             }

@@ -16,7 +16,7 @@
 #define PROFUNDIDAD 32 //profundidad máxima del árbol de directorios
 
 #define DEBUGN7 0
-#define DEBUGN9 1
+#define DEBUGN9 0
 
 struct entrada {
   char nombre[TAMNOMBRE];

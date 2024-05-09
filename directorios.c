@@ -347,24 +347,27 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
     unsigned int p_inodo=0;
     unsigned int p_entrada=0;
     indicecache=indicecache%3;
-    int existe=0;
+    int existe=1;
     for(int i=0;i<CACHE_SIZE;i++){
         if(strcmp(UltimasEntradas[i].camino, camino) == 0){
             p_inodo=UltimasEntradas[i].p_inodo;
-            existe=1;
-            fprintf(stderr,BLUE"\n[mi_read() → Utilizamos la caché de lectura en vez de llamar a buscar_entrada()]\n"RESET);
+            existe=0;
+            #if DEBUGN9
+                fprintf(stderr,BLUE"\n[mi_read() → Utilizamos la caché de lectura en vez de llamar a buscar_entrada()]\n"RESET);
+            #endif
             break;
         }
     }
-    if(!existe){
+    if(existe){
         int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
         if(error<0){
             return error;
         }
         strcpy(UltimasEntradas[indicecache].camino,camino);
         UltimasEntradas[indicecache].p_inodo=p_inodo;
-        fprintf(stderr,ORANGE"\n[mi_read() → Actualizamos la cache de lectura]\n"RESET);
-    
+        #if DEBUGN9
+            fprintf(stderr,ORANGE"\n[mi_read() → Actualizamos la cache de lectura]\n"RESET);
+        #endif
     }
     int leidos=mi_read_f(p_inodo,buf,offset,nbytes);
     if(leidos<0){

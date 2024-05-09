@@ -160,6 +160,7 @@ int mi_creat(const char *camino, unsigned char permisos){
     unsigned int p_entrada=0;
     int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,1,permisos);
     if(error<0){
+        mostrar_error_buscar_entrada(error);
         return error;
     }
     return EXITO;
@@ -190,7 +191,7 @@ int mi_dir(const char *camino, char *buffer, char tipo){
     if(tipo=='d'){
         struct entrada entradas[BLOCKSIZE/sizeof(struct entrada)];
         memset(entradas,0,sizeof(struct entrada));
-        int leidos=mi_read_f(p_inodo,entradas,0,BLOCKSIZE);
+        int leidos=mi_read_f(p_inodo,&entradas,0,BLOCKSIZE);
         if(leidos==FALLO){
             return FALLO;
         }

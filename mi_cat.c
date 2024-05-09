@@ -25,6 +25,7 @@ int main(int argc,char const *argv[]){
         mostrar_error_buscar_entrada(aux);
         aux=0;
     }
+    /*
     while(aux>0){
         leidos+=aux;
         write(1,buffer,aux);
@@ -36,6 +37,7 @@ int main(int argc,char const *argv[]){
             aux=0;
         }
     }
+    */
     printf("\nTotal_leidos: %d\n",leidos);
     if(bumount()==FALLO){
         return FALLO;

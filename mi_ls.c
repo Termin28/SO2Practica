@@ -30,6 +30,7 @@ int main(int argc,char const *argv[]){
     int nentradas;
     if(simple){
         nentradas=mi_dir(camino,buffer,'d');
+        printf("Total: %d\n",nentradas);
         char *tok=strtok(buffer,"\n");
         while(tok!=NULL){
             char *name=strrchr(tok, '\t');

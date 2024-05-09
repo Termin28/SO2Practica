@@ -4,7 +4,11 @@ int indicecache=0;
 static struct UltimaEntrada UltimasEntradas[CACHE_SIZE];
 
 /**
- * Función para extraer el
+ * Función para separar en 2 una cadena de caracteres.
+ * Recibe: El camino que hay que separar, un puntero por referencia donde se almacenara la parte inicial (la parte ubicada entre los dos primeros '/'),
+ * un puntero donde se almacena la parte final (el resto del camino después del segundo '/' incluido), un puntero al tipo de elemento que es
+ * el elemento almacenado en inicial ('f' fichero, 'd' directorio).
+ * Devuelve: 0 Si todo va bien. En caso de error devuelve -1.
 */
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
     if(camino[0]!='/'){
@@ -24,6 +28,13 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
     return EXITO;
 }
 
+/**
+ * Función para buscar una entrada determinada entre las entrada del inodo correspondiente a su inodo padre.
+ * Recibe: Dirección del directorio de la entrada, puntero al inodo del directorio padre, numero del inodo al que esta asociado
+ * la entrada buscada, el numero de la entrada dentro de p_inodo_dir que lo contiene, un valor para indicar si hay que reservar el inodo,
+ * permisos del inodo.
+ * Devuelve: 0 si todo va bien. Un valor menor a 0 si hay un error.
+*/
 int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsigned int *p_inodo, unsigned int *p_entrada, char reservar, unsigned char permisos){
     struct superbloque SB;
     struct entrada entrada;
@@ -128,6 +139,10 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     return EXITO;   
 }
 
+/**
+ * Función para mostrar un mensaje de error por pantalla
+ * Recibe: El valor del error
+*/
 void mostrar_error_buscar_entrada(int error){
     switch(error){
         case ERROR_CAMINO_INCORRECTO:
@@ -154,6 +169,11 @@ void mostrar_error_buscar_entrada(int error){
     }
 }
 
+/**
+ * Función que crea un fichero o directorio y su entrada de directorio
+ * Recibe: El camino donde crear el fichero/directorio, los permisos del fichero/directorio
+ * Devuelve 0 si todo va bien. Un valor menor a 0 si da error. 
+*/
 int mi_creat(const char *camino, unsigned char permisos){
     unsigned int p_inodo_dir=0;
     unsigned int p_inodo=0;
@@ -166,9 +186,18 @@ int mi_creat(const char *camino, unsigned char permisos){
     return EXITO;
 }
 
+/**
+ * Función para poner el contenido de un directorio en un buffer de memoria.
+ * Recibe: El camino del directorio, el buffer de memoria, el tipo de elemento (fichero/directorio);
+ * Devuelve: El numero de entradas. En caso de error devuelve un valor menor a 0
+*/
 int mi_dir(const char *camino, char *buffer, char tipo){
-    unsigned int p_inodo_dir=0;
-    unsigned int p_inodo=0;
+    struct superbloque SB;
+    if(bread(posSB,&SB)==FALLO){
+        return FALLO;
+    }
+    unsigned int p_inodo_dir=SB.posInodoRaiz;
+    unsigned int p_inodo=SB.posInodoRaiz;
     unsigned int p_entrada=0;
     int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
     if(error<0){
@@ -185,18 +214,19 @@ int mi_dir(const char *camino, char *buffer, char tipo){
     }
 
     char tmp[TAMFILA];
-    char tam[TAMFILA];
+    char tam[10];
     struct entrada entrada;
     int nentradas=inodo.tamEnBytesLog/sizeof(struct entrada);
     if(tipo=='d'){
         struct entrada entradas[BLOCKSIZE/sizeof(struct entrada)];
         memset(entradas,0,sizeof(struct entrada));
-        int leidos=mi_read_f(p_inodo,&entradas,0,BLOCKSIZE);
+        int leidos=0;
+        leidos=mi_read_f(p_inodo,entradas,0,BLOCKSIZE);
         if(leidos==FALLO){
             return FALLO;
         }
         for(int i=0;i<nentradas;i++){
-            if(leer_inodo(entradas[i].ninodo,&inodo)==FALLO){
+            if(leer_inodo(entradas[i%(BLOCKSIZE/sizeof(struct entrada))].ninodo,&inodo)==FALLO){
                 return FALLO;
             }
             if(inodo.tipo=='d'){
@@ -227,7 +257,7 @@ int mi_dir(const char *camino, char *buffer, char tipo){
                 strcat(buffer,BLUE);
             }
             
-            strcat(buffer,entradas[i].nombre);
+            strcat(buffer,entradas[i%(BLOCKSIZE/sizeof(struct entrada))].nombre);
             while((strlen(buffer)%TAMFILA)!=0){
                 strcat(buffer," ");
             }
@@ -276,6 +306,11 @@ int mi_dir(const char *camino, char *buffer, char tipo){
     return nentradas;
 }
 
+/**
+ * Función que cambia los permisos de un fichero o directorio
+ * Recibe: El camino del fichero/directorio, los permisos que poner
+ * Devuelve: 0 si todo va bien. Un valor menor a 0 si da error
+*/
 int mi_chmod(const char *camino, unsigned char permisos){
     unsigned int p_inodo_dir=0;
     unsigned int p_inodo=0;
@@ -290,6 +325,11 @@ int mi_chmod(const char *camino, unsigned char permisos){
     return EXITO;
 }
 
+/**
+ * Función que muestra la información acerca de un inodo de un fichero o de un directorio
+ * Recibe: El camino del fichero/directorio, recibe un puntero del struct STAT donde almacenar la información
+ * Devuelve: p_inodo di todo va bien. En caso de error devuelve menor a 0
+*/
 int mi_stat(const char *camino, struct STAT *p_stat){
     unsigned int p_inodo_dir=0;
     unsigned int p_inodo=0;
@@ -305,6 +345,12 @@ int mi_stat(const char *camino, struct STAT *p_stat){
     return p_inodo;
 }
 
+/**
+ * Función para escribir el contenido de un buffer en un fichero
+ * Recibe: El camino dle fichero al que escribir el contenido, el buffer que contiene el contenido a escribir,
+ * el offset a partir del que escribir, NºBytes a escribir.
+ * Devuelve:Nº de Bytes escritos, en caso de error devuelve un valor menor a 0.
+*/
 int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes){
     unsigned int p_inodo_dir=0;
     unsigned int p_inodo=0;
@@ -327,6 +373,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     if(!existe){
         int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
         if(error<0){
+            mostrar_error_buscar_entrada(error);
             return error;
         }
         strcpy(UltimasEntradas[indicecache].camino,camino);
@@ -347,6 +394,12 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     return escritos;
 }
 
+/**
+ * Función que lee los Nº Bytes de un fichero y lo almacena en un buffer.
+ * Recibe: El camino donde leer el fichero, buffer donde escribir el contenido leido,
+ * offset a partir del que leer, Nº Bytes a leer.
+ * Devuelve: NºBytes leido, valor menor a 0 en caso de error.
+*/
 int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes){
     unsigned int p_inodo_dir=0;
     unsigned int p_inodo=0;

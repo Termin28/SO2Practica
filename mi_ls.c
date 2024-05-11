@@ -30,6 +30,9 @@ int main(int argc,char const *argv[]){
     int nentradas;
     if(simple){
         nentradas=mi_dir(camino,buffer,'d');
+        if(nentradas<0){
+            return FALLO;
+        }
         printf("Total: %d\n",nentradas);
         char *tok=strtok(buffer,"\n");
         while(tok!=NULL){

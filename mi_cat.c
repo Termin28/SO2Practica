@@ -38,7 +38,7 @@ int main(int argc,char const *argv[]){
         }
     }
     
-    printf("\nTotal_leidos: %d\n",leidos);
+    fprintf(stderr,"\nTotal_leidos: %d\n",leidos);
     if(bumount()==FALLO){
         return FALLO;
     }

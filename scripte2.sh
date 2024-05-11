@@ -71,23 +71,23 @@ echo "               /     \\"
 echo "           fic111   fic112"
 echo -e "\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /\x1b[0m"
-./mi_ls disco /
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /\x1b[0m"
+./mi_ls -l disco /
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_stat disco /dir1/\x1b[0m"
 ./mi_stat disco /dir1/
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir1/\x1b[0m"
-./mi_ls disco /dir1/ 
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir1/\x1b[0m"
+./mi_ls -l disco /dir1/ 
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_stat disco /dir1/dir11/\x1b[0m"
 ./mi_stat disco /dir1/dir11/
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir1/dir11/\x1b[0m"
-./mi_ls disco /dir1/dir11/
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir1/dir11/\x1b[0m"
+./mi_ls -l disco /dir1/dir11/
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir1/dir12/ #Error: No existe el archivo o el directorio.\x1b[0m"
-./mi_ls disco /dir1/dir12/
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir1/dir12/ #Error: No existe el archivo o el directorio.\x1b[0m"
+./mi_ls -l disco /dir1/dir12/
 echo
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m$ ./mi_touch disco 6 /dir1/dir11/fic111 #Error: El archivo ya existe.\x1b[0m"
@@ -131,8 +131,8 @@ echo -e "\x1B[38;2;17;245;120m$ ./mi_escribir  disco /dir1/dir11/fic111 \"lo que
 ./mi_escribir  disco /dir1/dir11/fic111 "lo que sea" 209000
 echo
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir1/dir11/\x1b[0m"
-./mi_ls disco /dir1/dir11/
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir1/dir11/\x1b[0m"
+./mi_ls -l disco /dir1/dir11/
 echo
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m$ ./mi_escribir disco /dir1/dir11/fic112 \"hola1\" 209000 #⊂ BL 204 ∈ I0\x1b[0m"
@@ -195,8 +195,8 @@ echo "               /     \\"
 echo "           fic111   fic112"
 echo -e "\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir1/dir11/\x1b[0m"
-./mi_ls disco /dir1/dir11/
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir1/dir11/\x1b[0m"
+./mi_ls -l disco /dir1/dir11/
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_touch disco 6 /dir1/dir11/fic113\x1b[0m"
 ./mi_touch disco 6 /dir1/dir11/fic113
@@ -273,8 +273,8 @@ echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_rmdir disco /dir2/dir21/ #o mi_rm\x1b[0m"
 ./mi_rmdir disco /dir2/dir21/
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir2/\x1b[0m"
-./mi_ls disco /dir2/
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir2/\x1b[0m"
+./mi_ls -l disco /dir2/
 echo
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m"
@@ -346,8 +346,8 @@ echo -e "\x1B[38;2;17;245;120m$ ./mi_stat disco /dir3/\x1b[0m"
 ./mi_stat disco /dir3/
 echo
 echo -e "\x1B[38;2;17;245;120mVolvemos a listar el directorio para ver que se ha eliminado un subdirectorio\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir3/\x1b[0m"
-./mi_ls disco /dir3/
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir3/\x1b[0m"
+./mi_ls -l disco /dir3/
 
 echo "################################################################################"
 #make clean

@@ -19,7 +19,6 @@ int main(int argc,char const *argv[]){
         }
         int error=mi_creat(argv[3],permisos);
         if(error<0){
-            mostrar_error_buscar_entrada(error);
             return FALLO;
         }
         

@@ -3,7 +3,7 @@
 
 int main(int argc,char const *argv[]){
     if(argc!=3){
-        fprintf(stderr,RED"Error: La sintaxis es incorrecta. Sintaxis: ./mi_rmdir disco /ruta"RESET);
+        fprintf(stderr,RED"Error: La sintaxis es incorrecta. Sintaxis: ./mi_rmdir <disco> </ruta>"RESET);
         return FALLO;
     }
 

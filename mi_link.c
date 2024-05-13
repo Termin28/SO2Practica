@@ -3,7 +3,7 @@
 
 int main(int argc,char const *argv[]){
     if(argc!=4){
-        fprintf(stderr,RED"Error: La sintaxis es incorrecta. Sintaxis: ./mi_link disco /ruta_fichero_original /ruta_enlace"RESET);
+        fprintf(stderr,RED"Error: La sintaxis es incorrecta. Sintaxis: ./mi_link <disco> </ruta_fichero_original> </ruta_enlace>"RESET);
         return FALLO;
     }
     if(argv[2][strlen(argv[2])-1]=='/'){

@@ -48,7 +48,6 @@ int main(int argc,char const *argv[]){
         if(camino[strlen(camino)-1]!='/'){
             nentradas=mi_dir(camino,buffer,'f');
             if(nentradas<0){
-                mostrar_error_buscar_entrada(nentradas);
                 return FALLO;
             }
             printf("Tipo\tPermisos\tmTime\t\tTamaño\tNombre\n");
@@ -57,7 +56,6 @@ int main(int argc,char const *argv[]){
         }else{
             nentradas=mi_dir(camino,buffer,'d');
             if(nentradas<0){
-                mostrar_error_buscar_entrada(nentradas);
                 return FALLO;
             }
             printf("Total: %d\n",nentradas);

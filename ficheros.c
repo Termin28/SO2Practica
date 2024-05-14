@@ -8,13 +8,16 @@
  * Devuelve: Nº bytes escritos. En caso de error devuelve -1
 */
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
+    mi_waitSem();
     struct inodo inodo;
     if(leer_inodo(ninodo,&inodo)==FALLO){
+        mi_signalSem();
         return FALLO;
     }
 
     if ((inodo.permisos & 2) != 2) {
        fprintf(stderr, RED "No hay permisos de escritura\n" RESET);
+       mi_signalSem();
        return FALLO;
     }
     int primerBL=offset/BLOCKSIZE;
@@ -24,15 +27,18 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
     int nbfisico=traducir_bloque_inodo(&inodo,primerBL,1);
     if(escribir_inodo(ninodo,&inodo)==FALLO){
+        mi_signalSem();
         return FALLO;
     }
 
     if(nbfisico==FALLO){
+        mi_signalSem();
         return FALLO;
     }
 
     unsigned char buf_bloque[BLOCKSIZE];
     if(bread(nbfisico,buf_bloque)==FALLO){
+        mi_signalSem();
         return FALLO;
     }
 
@@ -41,6 +47,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     if(primerBL==ultimoBL){
         memcpy(buf_bloque + desp1, buf_original, nbytes);
         if(bwrite(nbfisico,buf_bloque)==FALLO){
+            mi_signalSem();
             return FALLO;
         }
         escritos=nbytes;
@@ -48,6 +55,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         memcpy(buf_bloque+desp1,buf_original,BLOCKSIZE-desp1);
         aux=bwrite(nbfisico,buf_bloque);
         if(aux==FALLO){
+            mi_signalSem();
             return FALLO;
         }
         escritos=aux-desp1;
@@ -55,13 +63,16 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             nbfisico=traducir_bloque_inodo(&inodo,i,1);
 
             if(escribir_inodo(ninodo,&inodo)==FALLO){
+                mi_signalSem();
                 return FALLO;
             }
             if(nbfisico==FALLO){
+                mi_signalSem();
                 return FALLO;
             }
             aux=bwrite(nbfisico,buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE);
             if(aux==FALLO){
+                mi_signalSem();
                 return FALLO;
             }
             escritos+=aux;
@@ -69,22 +80,27 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
         nbfisico=traducir_bloque_inodo(&inodo,ultimoBL,1);
         if(escribir_inodo(ninodo,&inodo)==FALLO){
+            mi_signalSem();
             return FALLO;
         }
         if(nbfisico==FALLO){
+            mi_signalSem();
             return FALLO;
         }
         if(bread(nbfisico,buf_bloque)==FALLO){
+            mi_signalSem();
             return FALLO;
         }
 
         memcpy(buf_bloque,buf_original + (nbytes - (desp2 + 1)), desp2 + 1);
         if(bwrite(nbfisico,buf_bloque)==FALLO){
+            mi_signalSem();
             return FALLO;
         }
         escritos+=desp2+1;
     }
     if(leer_inodo(ninodo,&inodo)==FALLO){
+        mi_signalSem();
         return FALLO;
     }
 
@@ -94,12 +110,15 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     }
     inodo.mtime=time(NULL);
     if(escribir_inodo(ninodo,&inodo)==FALLO){
+        mi_signalSem();
         return FALLO;
     }
 
     if(nbytes==escritos){
+        mi_signalSem();
         return nbytes;
     }
+    mi_signalSem();
     return FALLO;
 }
 
@@ -174,7 +193,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         }
         leidos+=desp2+1;
     }
-
+    mi_waitSem();
     if(leer_inodo(ninodo,&inodo)==FALLO){
         return FALLO;
     }
@@ -184,6 +203,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     if(escribir_inodo(ninodo,&inodo)==FALLO){
         return FALLO;
     }
+    mi_signalSem();
 
     if(nbytes==leidos){
         return leidos;
@@ -219,6 +239,7 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat){
  * Devuelve: 0 si todo va bien. En caso de error devuelve -1
 */
 int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
+    mi_waitSem();
     struct inodo inodo;
     if(leer_inodo(ninodo,&inodo)==FALLO){
         return FALLO;
@@ -228,6 +249,7 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
     if(escribir_inodo(ninodo,&inodo)==FALLO){
         return FALLO;
     }
+    mi_signalSem();
     return EXITO;
 }
 

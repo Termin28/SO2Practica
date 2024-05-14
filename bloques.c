@@ -1,7 +1,9 @@
 //Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "bloques.h"
 
+static sem_t *mutex;
 static int descriptor=0;
+static unsigned int inside_sc = 0;
 
 /**
  * Función que monta el dispositivo virtual
@@ -9,12 +11,19 @@ static int descriptor=0;
  * Devuelve: El filedescriptor. En caso de error devuelve -1. 
 */
 int bmount(const char *camino){
+    if (!mutex) { // el semáforo es único en el sistema y sólo se ha de inicializar 1 vez (padre)
+        mutex = initSem(); 
+        if (mutex == SEM_FAILED) {
+            return -1;
+        }
+    }
     umask(000);
     descriptor=open(camino,O_RDWR | O_CREAT,0666);
     if(descriptor==-1){
         perror("Error");
         return FALLO;
     }
+
     return descriptor;
 }
 
@@ -23,6 +32,7 @@ int bmount(const char *camino){
  * Devuelve: 0 si no hay error. En caso de error devuelve -1
 */
 int bumount(){
+    deleteSem(); 
     if(close(descriptor)==-1){
         perror("Error");
         return FALLO;
@@ -63,4 +73,19 @@ int bread(unsigned int nbloque, void *buf){
         perror("Error");
     }
     return bytes;
+}
+
+void mi_waitSem() {
+   if (!inside_sc) { // inside_sc==0, no se ha hecho ya un wait
+       waitSem(mutex);
+   }
+   inside_sc++;
+}
+
+
+void mi_signalSem() {
+   inside_sc--;
+   if (!inside_sc) {
+       signalSem(mutex);
+   }
 }

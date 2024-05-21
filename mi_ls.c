@@ -50,7 +50,7 @@ int main(int argc,char const *argv[]){
             if(nentradas<0){
                 return FALLO;
             }
-            printf("Tipo\tPermisos\tmTime\t\tTamaño\tNombre\n");
+            printf("Tipo\tModo\tmTime\t\t\tTamaño\t\tNombre\n");
             printf("---------------------------------------------------------------------------------------------\n");
             printf("%s\n",buffer);
         }else{
@@ -60,7 +60,7 @@ int main(int argc,char const *argv[]){
             }
             printf("Total: %d\n",nentradas);
             if(nentradas!=0){
-                printf("Tipo\tPermisos\tmTime\t\tTamaño\tNombre\n");
+                printf("Tipo\tModo\tmTime\t\t\tTamaño\t\tNombre\n");
                 printf("---------------------------------------------------------------------------------------------\n");
                 printf("%s\n",buffer);
             }

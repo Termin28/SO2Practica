@@ -252,7 +252,7 @@ int mi_dir(const char *camino, char *buffer, char tipo){
 
             sprintf(tam,"%d",inodo.tamEnBytesLog);
             strcat(buffer,tam);
-            strcat(buffer,"\t");
+            strcat(buffer,"\t\t");
 
             if(inodo.tipo=='d'){
                 strcat(buffer,ORANGE);
@@ -296,7 +296,7 @@ int mi_dir(const char *camino, char *buffer, char tipo){
 
         sprintf(tam,"%d",inodo.tamEnBytesLog);
         strcat(buffer,tam);
-        strcat(buffer,"\t");
+        strcat(buffer,"\t\t");
 
         strcat(buffer,BLUE);
         strcat(buffer,entrada.nombre);

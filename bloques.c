@@ -18,6 +18,9 @@ int bmount(const char *camino){
         }
     }
     umask(000);
+    if(descriptor>0){
+        close(descriptor);
+    }
     descriptor=open(camino,O_RDWR | O_CREAT,0666);
     if(descriptor==-1){
         perror("Error");
@@ -32,11 +35,12 @@ int bmount(const char *camino){
  * Devuelve: 0 si no hay error. En caso de error devuelve -1
 */
 int bumount(){
-    deleteSem(); 
-    if(close(descriptor)==-1){
+    descriptor=close(descriptor);
+    if(descriptor==-1){
         perror("Error");
         return FALLO;
     }
+    deleteSem(); 
     return EXITO;
 }
 

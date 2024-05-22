@@ -11,6 +11,7 @@ void reaper(){
 }
 
 int main(int argc,char **argv){
+    signal(SIGCHLD, reaper);
     if(argc!=2){
         fprintf(stderr,RED"Error: La sintaxis es incorrecta. Sintaxis: ./simulacion <disco>\n"RESET);
         return FALLO;
@@ -33,17 +34,19 @@ int main(int argc,char **argv){
         bumount();
         return FALLO;
     }
-    signal(SIGCHLD, reaper);
     pid_t pid;
-    for(int i=1;i<=NUMPROCESOS;i++){
+    for(int proceso=1;proceso<=NUMPROCESOS;proceso++){
         pid=fork();
         if(pid==0){
             if(bmount(argv[1])==FALLO){
                 return FALLO;
             }
-            char *aux=malloc(sizeof(camino)+sizeof(pid_t));
+            char *aux=malloc(sizeof(camino)+sizeof(pid_t)+1+11+9);
             strcpy(aux,simul);
             strcat(aux,tmp);
+            strcat(aux,"/");
+            char process[9]="proceso_";
+            strcat(aux,process);
             char *temp=malloc(sizeof(pid_t));
             sprintf(temp,"%d",getpid());
             strcat(aux,temp);
@@ -59,21 +62,21 @@ int main(int argc,char **argv){
                 return FALLO;
             }
             srand(time(NULL) + getpid());
-            for(int j=1;j<=NUMESCRITURAS;j++){
+            for(int nescritura=1;nescritura<=NUMESCRITURAS;nescritura++){
                 struct REGISTRO registro;
                 registro.fecha=time(NULL);
                 registro.pid=getpid();
-                registro.nEscritura=j;
+                registro.nEscritura=nescritura;
                 registro.nRegistro=rand()%REGMAX;
                 if(mi_write(aux,&registro,registro.nRegistro*sizeof(struct REGISTRO),sizeof(struct REGISTRO))<0){
                     return FALLO;
                 }
                 #if DEBUGN12
-                    fprintf(stderr, "[simulación.c → Escritura %d en %s\n", j, aux);
+                    fprintf(stderr, "[simulación.c → Escritura %d en %s\n", nescritura, aux);
                 #endif
                 usleep(50000);
             }
-            fprintf(stderr, "Proceso %d: Completadas %d escrituras en %s\n", i, 
+            fprintf(stderr, "Proceso %d: Completadas %d escrituras en %s\n", proceso, 
                     NUMESCRITURAS, aux);
             if(bumount()==FALLO){
                 return FALLO;

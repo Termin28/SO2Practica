@@ -2,6 +2,7 @@
     "C_Cpp.default.compilerPath": "/usr/bin/gcc",
     "files.associations": {
         "directorios.h": "c",
-        "ficheros_basico.h": "c"
+        "ficheros_basico.h": "c",
+        "verificacion.h": "c"
     }
 }

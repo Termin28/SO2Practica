@@ -4,7 +4,7 @@
 int main(int argc, char **argv){
     //Comprobar sintaxis
     if(argc!=3){
-        fprintf(stderr,"Error: La sintaxis es incorrecta. Sintaxis: ./mi_mkfs <nombre_dispositivo> <nbloques>");
+        fprintf(stderr,"Error: La sintaxis es incorrecta. Sintaxis: ./mi_mkfs <nombre_dispositivo> <nbloques>\n");
         return FALLO;
     }
 

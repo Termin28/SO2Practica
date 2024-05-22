@@ -2,10 +2,10 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#define DEBUGN12 0
+#define DEBUGN12 1
 
-#define NUMPROCESOS 100
-#define NUMESCRITURAS 50
+#define NUMPROCESOS 3
+#define NUMESCRITURAS 10
 #define REGMAX 500000
 
 struct REGISTRO { //sizeof(struct REGISTRO): 24 bytes

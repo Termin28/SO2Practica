@@ -1,6 +1,6 @@
 //Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "ficheros_basico.h"
-
+#define FAILURE -1
 /**
  * Función que calcula el tamaño en bloques necesarios para el mapa de bits
  * Recibe: El numero de bloques del dispositivo
@@ -159,7 +159,7 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
     if(bread(nbloqueabs,bufferMB)==FALLO){
         return FALLO;
     }
-
+    posbyte = posbyte % BLOCKSIZE;
     unsigned char mascara=128;
     mascara>>=posbit;
     if(bit==1){
@@ -439,13 +439,18 @@ int obtener_indice(unsigned int nblogico,int nivel_punteros){
 
 /**
  * Función para obtener el bloque fisico en el que se situa un bloque logico de un determinado inodo
- * Recibe: Variable struct inodo, Nº Bloque logico, variable que indica si queremos leer o consultar el bloque fisico 
+ * Recibe: Nº inodo, Nº Bloque logico, variable que indica si queremos leer o consultar el bloque fisico 
  * Devuelve: La posición del bloque fisico. En caso de error devuelve -1
 */
-int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned char reservar){
+int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned char reservar){
+    struct inodo inodo;
     unsigned int ptr=0;
     unsigned int ptr_ant=0;
-    int nRangoBL=obtener_nRangoBL(inodo,nblogico,&ptr);
+    if(leer_inodo(ninodo,&inodo)==FALLO){
+        return FALLO;
+    }
+
+    int nRangoBL=obtener_nRangoBL(&inodo,nblogico,&ptr);
     if(nRangoBL==FALLO){
         return FALLO;
     }
@@ -455,13 +460,13 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
     while(nivel_punteros>0){
         if(ptr==0){
             if(reservar==0){
-                return -1;
+                return FALLO;
             }
             ptr=reservar_bloque();
-            inodo->numBloquesOcupados++;
-            inodo->ctime=time(NULL);
+            inodo.numBloquesOcupados++;
+            inodo.ctime=time(NULL);
             if(nivel_punteros==nRangoBL){
-                inodo->punterosIndirectos[nRangoBL-1]=ptr;
+                inodo.punterosIndirectos[nRangoBL-1]=ptr;
                 #if DEBUGN4
                     fprintf(stderr,GRAY"[traducir_bloque_inodo()→ inodo.punterosIndirectos[%d] = %d (reservado BF %d para punteros_nivel%d)]\n"RESET,nRangoBL-1,ptr,ptr,nivel_punteros);
                 #endif
@@ -475,11 +480,11 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                 }
             }
             memset(buffer,0,BLOCKSIZE);
-        }else{
-            if(bread(ptr,buffer)==FALLO){
-                return FALLO;
-            }
         }
+        if(bread(ptr,buffer)==FALLO){
+            return FALLO;
+        }
+        
         indice=obtener_indice(nblogico,nivel_punteros);
         if(indice==FALLO){
             return FALLO;
@@ -494,10 +499,10 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
             return FALLO;
         }
         ptr=reservar_bloque();
-        inodo->numBloquesOcupados++;
-        inodo->ctime=time(NULL);
+        inodo.numBloquesOcupados++;
+        inodo.ctime=time(NULL);
         if(nRangoBL==0){
-            inodo->punterosDirectos[nblogico]=ptr;
+            inodo.punterosDirectos[nblogico]=ptr;
             #if DEBUGN4
                 fprintf(stderr,GRAY"[traducir_bloque_inodo()→ inodo.punterosDirectos[%d] = %d (reservado BF %d para BL %d)]\n"RESET,nblogico,ptr,ptr,nblogico);
             #endif
@@ -510,6 +515,9 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                 return FALLO;
             }
         }
+    }
+    if(escribir_inodo(ninodo,&inodo)==FALLO){
+        return FALLO;
     }
     return ptr;
 }

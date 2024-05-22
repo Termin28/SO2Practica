@@ -72,11 +72,9 @@ int main(int argc,char **argv){
                     fprintf(stderr, "[simulación.c → Escritura %d en %s\n", j, aux);
                 #endif
                 usleep(50000);
-                if(j == NUMESCRITURAS){
-                    fprintf(stderr, "Proceso %d: Completadas %d escrituras en %s\n", i, 
-                    NUMESCRITURAS, aux);
-                }
             }
+            fprintf(stderr, "Proceso %d: Completadas %d escrituras en %s\n", i, 
+                    NUMESCRITURAS, aux);
             if(bumount()==FALLO){
                 return FALLO;
             }

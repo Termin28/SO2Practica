@@ -22,7 +22,7 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
         strcpy(tipo,"f");
     }else{
         strcpy(final,resto);
-        strncpy(inicial,camino+1,strlen(camino+1) - strlen(resto)); //N= Tamaño del camino(sin la primera '/') - tamaño del resto 
+        strncpy(inicial,camino+1,strlen(camino+1) - strlen(resto)); //Tamaño del camino(sin la primera '/') - tamaño del resto 
         strcpy(tipo,"d");
     }
     return EXITO;
@@ -375,7 +375,6 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     if(!existe){
         int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
         if(error<0){
-            fprintf(stderr,RED"\nHola\n"RESET);
             mostrar_error_buscar_entrada(error);
             return error;
         }
@@ -444,8 +443,8 @@ int mi_link(const char *camino1, const char *camino2){
     unsigned int p_entrada1=0;
     int error=buscar_entrada(camino1,&p_inodo_dir1,&p_inodo1,&p_entrada1,0,4);
     if(error<0){
-        mostrar_error_buscar_entrada(error);
         mi_signalSem();
+        mostrar_error_buscar_entrada(error);
         return error;
     }
     struct inodo inodo;
@@ -454,7 +453,6 @@ int mi_link(const char *camino1, const char *camino2){
         return FALLO;
     }
     if(inodo.tipo!='f'){
-        //FICHERO
         mi_signalSem();
         return FALLO;
     }

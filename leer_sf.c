@@ -125,15 +125,15 @@ int main(int argc,char **argv){
     if(leer_inodo(ninodo,&inodo)==FALLO){
         return FALLO;
     }
-    traducir_bloque_inodo(&inodo,8,1);
+    traducir_bloque_inodo(ninodo,8,1);
     printf("\n");
-    traducir_bloque_inodo(&inodo,204,1);
+    traducir_bloque_inodo(ninodo,204,1);
     printf("\n");
-    traducir_bloque_inodo(&inodo,30004,1);
+    traducir_bloque_inodo(ninodo,30004,1);
     printf("\n");
-    traducir_bloque_inodo(&inodo,400004,1);
+    traducir_bloque_inodo(ninodo,400004,1);
     printf("\n");
-    traducir_bloque_inodo(&inodo,468750,1);
+    traducir_bloque_inodo(ninodo,468750,1);
     struct tm *ts;
     char atime[80];
     char mtime[80];

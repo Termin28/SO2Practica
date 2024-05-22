@@ -11,6 +11,10 @@ static unsigned int inside_sc = 0;
  * Devuelve: El filedescriptor. En caso de error devuelve -1. 
 */
 int bmount(const char *camino){
+    if(descriptor>0){
+        close(descriptor);
+    }
+
     if (!mutex) { // el semáforo es único en el sistema y sólo se ha de inicializar 1 vez (padre)
         mutex = initSem(); 
         if (mutex == SEM_FAILED) {
@@ -18,11 +22,8 @@ int bmount(const char *camino){
         }
     }
     umask(000);
-    if(descriptor>0){
-        close(descriptor);
-    }
     descriptor=open(camino,O_RDWR | O_CREAT,0666);
-    if(descriptor==-1){
+    if(descriptor==FALLO){
         perror("Error");
         return FALLO;
     }
@@ -36,11 +37,11 @@ int bmount(const char *camino){
 */
 int bumount(){
     descriptor=close(descriptor);
-    if(descriptor==-1){
+    deleteSem(); 
+    if(descriptor==FALLO){
         perror("Error");
         return FALLO;
     }
-    deleteSem(); 
     return EXITO;
 }
 
@@ -50,12 +51,12 @@ int bumount(){
  * Devuelve: Nº Bytes escritos. En caso de error devuelve -1.
 */
 int bwrite(unsigned int nbloque, const void *buf){
-    if(lseek(descriptor,nbloque*BLOCKSIZE,SEEK_SET)==-1){
+    if(lseek(descriptor,nbloque*BLOCKSIZE,SEEK_SET)==FALLO){
         perror("Error");
         return FALLO;
     }
     int bytes=write(descriptor,buf,BLOCKSIZE);
-    if(bytes==-1){
+    if(bytes==FALLO){
         perror("Error");
         return FALLO;
     }
@@ -73,23 +74,23 @@ int bread(unsigned int nbloque, void *buf){
         return FALLO;
     }
     int bytes=read(descriptor,buf,BLOCKSIZE);
-    if(bytes==-1){
+    if(bytes==FALLO){
         perror("Error");
     }
     return bytes;
 }
 
 void mi_waitSem() {
-   if (!inside_sc) { // inside_sc==0, no se ha hecho ya un wait
-       waitSem(mutex);
-   }
+    if (!inside_sc) { // inside_sc==0, no se ha hecho ya un wait
+        waitSem(mutex);
+    }
    inside_sc++;
 }
 
 
 void mi_signalSem() {
-   inside_sc--;
-   if (!inside_sc) {
-       signalSem(mutex);
-   }
+    inside_sc--;
+    if (!inside_sc) {
+        signalSem(mutex);
+    }
 }

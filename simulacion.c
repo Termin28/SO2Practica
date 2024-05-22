@@ -68,7 +68,9 @@ int main(int argc,char **argv){
                 if(mi_write(aux,&registro,registro.nRegistro*sizeof(struct REGISTRO),sizeof(struct REGISTRO))<0){
                     return FALLO;
                 }
-                fprintf(stderr, "[simulación.c → Escritura %d en %s\n", j, aux);
+                #if DEBUGN12
+                    fprintf(stderr, "[simulación.c → Escritura %d en %s\n", j, aux);
+                #endif
                 usleep(50000);
                 if(j == NUMESCRITURAS){
                     fprintf(stderr, "Proceso %d: Completadas %d escrituras en %s\n", i, 

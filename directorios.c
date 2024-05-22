@@ -136,7 +136,6 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
         *p_inodo_dir=entrada.ninodo;
         return buscar_entrada(final,p_inodo_dir,p_inodo,p_entrada,reservar,permisos);
     }
-    return EXITO;   
 }
 
 /**
@@ -252,7 +251,7 @@ int mi_dir(const char *camino, char *buffer, char tipo){
 
             sprintf(tam,"%d",inodo.tamEnBytesLog);
             strcat(buffer,tam);
-            strcat(buffer,"\t\t");
+            strcat(buffer,"\t");
 
             if(inodo.tipo=='d'){
                 strcat(buffer,ORANGE);
@@ -296,7 +295,7 @@ int mi_dir(const char *camino, char *buffer, char tipo){
 
         sprintf(tam,"%d",inodo.tamEnBytesLog);
         strcat(buffer,tam);
-        strcat(buffer,"\t\t");
+        strcat(buffer,"\t");
 
         strcat(buffer,BLUE);
         strcat(buffer,entrada.nombre);
@@ -376,6 +375,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     if(!existe){
         int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
         if(error<0){
+            fprintf(stderr,RED"\nHola\n"RESET);
             mostrar_error_buscar_entrada(error);
             return error;
         }

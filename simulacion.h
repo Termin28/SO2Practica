@@ -2,6 +2,8 @@
 #include <sys/wait.h>
 #include <signal.h>
 
+#define DEBUGN12 0
+
 #define NUMPROCESOS 100
 #define NUMESCRITURAS 50
 #define REGMAX 500000

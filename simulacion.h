@@ -4,9 +4,10 @@
 
 #define DEBUGN12 1
 
-#define NUMPROCESOS 3
-#define NUMESCRITURAS 10
+#define NUMPROCESOS 100
+#define NUMESCRITURAS 50
 #define REGMAX 500000
+#define DEBUGN13 1
 
 struct REGISTRO { //sizeof(struct REGISTRO): 24 bytes
    time_t fecha; //Precisión segundos [opcionalmente microsegundos con struct timeval]

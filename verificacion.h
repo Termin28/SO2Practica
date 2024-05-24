@@ -1,5 +1,6 @@
 #include "simulacion.h"
 
+#define DEBUGN13 1
 
 struct INFORMACION {
   int pid;

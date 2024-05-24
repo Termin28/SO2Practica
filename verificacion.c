@@ -18,7 +18,7 @@ int main(int argc,char **argv){
         return FALLO;
     }
 
-    char nombre[TAMFILA]="informe.txt";
+    char *nombre=malloc(strlen(argv[2])+strlen("informe.txt"));
     sprintf(nombre,"%s%s",argv[2],"informe.txt");
     if(mi_creat(nombre,7)<0){
         return FALLO;
@@ -42,7 +42,7 @@ int main(int argc,char **argv){
         int offset=0;
         char *camino=malloc(strlen(argv[2])+strlen(entradas[i].nombre)+strlen("prueba.dat")+1);
         sprintf(camino,"%s%s%s",argv[2],entradas[i].nombre,"/prueba.dat");
-        while (mi_read(argv[2], buffer_escrituras, offset, sizeof(buffer_escrituras)) > 0){
+        while (mi_read(camino, buffer_escrituras, offset, sizeof(buffer_escrituras)) > 0){
             int validadas=0;
             while(validadas<cant_registros_buffer_escrituras){
                 if(buffer_escrituras[validadas].pid==pid){
@@ -95,21 +95,23 @@ int main(int argc,char **argv){
 
         char buffer[BLOCKSIZE];
         memset(buffer,0,BLOCKSIZE);
+
         sprintf(buffer,"PID: %d\nNumero de escrituras: %d\n"
         "Primera Escritura\t%d\t%d\t%s"
         "\nUltima Escritura\t%d\t%d\t%s"
         "\nMenor Posicion\t%d\t%d\t%s"
-        "\nMayor Posicion\t%d\t%d\t%s\n",pid,informacion.nEscrituras,
+        "\nMayor Posicion\t%d\t%d\t%s\n\n",pid,informacion.nEscrituras,
         informacion.PrimeraEscritura.nEscritura,informacion.PrimeraEscritura.nRegistro,primero,
         informacion.UltimaEscritura.nEscritura,informacion.UltimaEscritura.nRegistro,ultimo,
         informacion.MenorPosicion.nEscritura,informacion.MenorPosicion.nRegistro,menor,
         informacion.MayorPosicion.nEscritura,informacion.MayorPosicion.nRegistro,mayor);
 
-        if(escritos+=mi_write(camino,&buffer,escritos,strlen(buffer))<0){
+        if((escritos+=mi_write(nombre,&buffer,escritos,strlen(buffer)))<0){
             if(bumount()){
                 return FALLO;
             }
         }
+        free(camino);
     }
     if(bumount()==FALLO){
         return FALLO;

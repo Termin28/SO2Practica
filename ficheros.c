@@ -1,12 +1,7 @@
 //Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "ficheros.h"
-#define FAILURE -1
-/**
- * Función que escribe el contenido de un buffer de nbytes en un fichero/directorio
- * Recibe: Nº inodo al que escribir el fichero, buffer con el contenido a escribir,
- * posicion de escritura incial respecto al inodo (en bytes), Nº bytes a escribir
- * Devuelve: Nº bytes escritos. En caso de error devuelve -1
-*/
+
+
 /**
  * Función que escribe el contenido de un buffer de nbytes en un fichero/directorio
  * Recibe: Nº inodo al que escribir el fichero, buffer con el contenido a escribir,
@@ -157,7 +152,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     }else if(primerBL<ultimoBL){
         if(nbfisico!=FALLO){ 
             if(bread(nbfisico,buf_bloque)==FALLO){
-                    return FALLO;
+                return FALLO;
             }
             memcpy(buf_original,buf_bloque + desp1,BLOCKSIZE-desp1);
         }
@@ -179,7 +174,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             if(bread(nbfisico,buf_bloque)==FALLO){
                 return FALLO;
             }
-            memcpy(buf_original+(nbytes-(desp2-1)),buf_bloque,desp2+1);
+            memcpy(buf_original+(nbytes-desp2-1),buf_bloque,desp2+1);
         }
         leidos+=desp2+1;
     }

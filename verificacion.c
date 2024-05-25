@@ -51,13 +51,7 @@ int main(int argc,char **argv){
                         informacion.MenorPosicion=buffer_escrituras[validadas];
                         informacion.PrimeraEscritura=buffer_escrituras[validadas];
                         informacion.UltimaEscritura=buffer_escrituras[validadas];
-                        informacion.nEscrituras++;
                     }else{
-                        /*
-                        if(difftime(buffer_escrituras[validadas].fecha,informacion.PrimeraEscritura.fecha)>=0 && 
-                            buffer_escrituras[validadas].nEscritura<informacion.PrimeraEscritura.nEscritura){
-                                informacion.PrimeraEscritura=buffer_escrituras[validadas];
-                        }*/
                         if(buffer_escrituras[validadas].nEscritura<informacion.PrimeraEscritura.nEscritura){
                             informacion.PrimeraEscritura=buffer_escrituras[validadas];
                         }else if(buffer_escrituras[validadas].nEscritura>informacion.UltimaEscritura.nEscritura){
@@ -68,8 +62,8 @@ int main(int argc,char **argv){
                         }else if(buffer_escrituras[validadas].nRegistro>informacion.MayorPosicion.nRegistro){
                             informacion.MayorPosicion=buffer_escrituras[validadas];
                         }
-                        informacion.nEscrituras++;
                     }
+                    informacion.nEscrituras++;
                 }
                 validadas++;
             }
@@ -77,7 +71,7 @@ int main(int argc,char **argv){
             offset+=sizeof(buffer_escrituras);
         }
         #if DEBUGN13
-            fprintf(stderr,GRAY"[%d) %d escrituras validadas en %s]\n"RESET,i,informacion.nEscrituras,camino);
+            fprintf(stderr,GRAY"[%d) %d escrituras validadas en %s]\n"RESET,i+1,informacion.nEscrituras,camino);
         #endif
         char primero[TAMFILA];
         char ultimo[TAMFILA];
@@ -99,8 +93,8 @@ int main(int argc,char **argv){
         sprintf(buffer,"PID: %d\nNumero de escrituras: %d\n"
         "Primera Escritura\t%d\t%d\t%s"
         "\nUltima Escritura\t%d\t%d\t%s"
-        "\nMenor Posicion\t%d\t%d\t%s"
-        "\nMayor Posicion\t%d\t%d\t%s\n\n",pid,informacion.nEscrituras,
+        "\nMenor Posicion\t\t%d\t%d\t%s"
+        "\nMayor Posicion\t\t%d\t%d\t%s\n\n",pid,informacion.nEscrituras,
         informacion.PrimeraEscritura.nEscritura,informacion.PrimeraEscritura.nRegistro,primero,
         informacion.UltimaEscritura.nEscritura,informacion.UltimaEscritura.nRegistro,ultimo,
         informacion.MenorPosicion.nEscritura,informacion.MenorPosicion.nRegistro,menor,

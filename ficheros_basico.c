@@ -1,4 +1,4 @@
-//Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
+//Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayáa
 #include "ficheros_basico.h"
 
 /**

@@ -40,6 +40,7 @@ int main(int argc,char **argv){
         int cant_registros_buffer_escrituras = 256; 
         struct REGISTRO buffer_escrituras [cant_registros_buffer_escrituras];
         memset(buffer_escrituras, 0, sizeof(buffer_escrituras));
+
         int offset=0;
         char *camino=malloc(strlen(argv[2])+strlen(entradas[i].nombre)+strlen("prueba.dat")+1);
         sprintf(camino,"%s%s%s",argv[2],entradas[i].nombre,"/prueba.dat");
@@ -47,6 +48,7 @@ int main(int argc,char **argv){
             int validadas=0;
             while(validadas<cant_registros_buffer_escrituras){
                 if(buffer_escrituras[validadas].pid==pid){
+                    //Si es la primera escritura
                     if(informacion.nEscrituras==0){
                         informacion.MayorPosicion=buffer_escrituras[validadas];
                         informacion.MenorPosicion=buffer_escrituras[validadas];

@@ -20,14 +20,14 @@ int main(int argc,char **argv){
     if(bmount(argv[1])==FALLO){
         return FALLO;
     }
-    char tmp[14];
+    char tmp[14]; //len(aaaammddhhmmss)=14
     time_t tiempo;
     time(&tiempo);
     struct tm *tm;
     tm = localtime(&tiempo);
     sprintf(tmp, "%d%02d%02d%02d%02d%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,  tm->tm_sec);
-    char simul[8]="/simul_";
-    char *camino=malloc(strlen(simul)+strlen(tmp)+1);
+    char simul[8]="/simul_"; //len(simul_)=7 + 1 para el caracter \0 para el strcat
+    char *camino=malloc(strlen(simul)+strlen(tmp)+1); // +1 para el caracter "/"
     strcpy(camino,simul);
     strcat(camino,tmp);
     strcat(camino,"/");
@@ -36,6 +36,7 @@ int main(int argc,char **argv){
         return FALLO;
     }
     pid_t pid;
+    fprintf(stderr,"*** SIMULACIÓN DE %d PROCESOS REALIZANDO CADA UNO %d ESCRITURAS ***\n",NUMPROCESOS,NUMESCRITURAS);
     for(int proceso=1;proceso<=NUMPROCESOS;proceso++){
         pid=fork();
         if(pid==0){

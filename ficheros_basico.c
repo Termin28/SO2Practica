@@ -1,6 +1,6 @@
 //Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "ficheros_basico.h"
-#define FAILURE -1
+
 /**
  * Función que calcula el tamaño en bloques necesarios para el mapa de bits
  * Recibe: El numero de bloques del dispositivo

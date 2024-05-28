@@ -1,3 +1,4 @@
+//Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "simulacion.h"
 
 int acabados=0;

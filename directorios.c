@@ -407,18 +407,18 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
     unsigned int p_inodo=0;
     unsigned int p_entrada=0;
     indicecache=indicecache%3;
-    int existe=1;
+    int noexiste=1;
     for(int i=0;i<CACHE_SIZE;i++){
         if(strcmp(UltimasEntradas[i].camino, camino) == 0){
             p_inodo=UltimasEntradas[i].p_inodo;
-            existe=0;
+            noexiste=0;
             #if DEBUGN9
                 fprintf(stderr,BLUE"\n[mi_read() → Utilizamos la caché de lectura en vez de llamar a buscar_entrada()]\n"RESET);
             #endif
             break;
         }
     }
-    if(existe){
+    if(noexiste){
         int error=buscar_entrada(camino,&p_inodo_dir,&p_inodo,&p_entrada,0,4);
         if(error<0){
             return error;
@@ -443,8 +443,8 @@ int mi_link(const char *camino1, const char *camino2){
     unsigned int p_entrada1=0;
     int error=buscar_entrada(camino1,&p_inodo_dir1,&p_inodo1,&p_entrada1,0,4);
     if(error<0){
-        mi_signalSem();
         mostrar_error_buscar_entrada(error);
+        mi_signalSem();
         return error;
     }
     struct inodo inodo;

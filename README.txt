@@ -18,6 +18,8 @@
     mi_link.c: ./mi_link <disco> </ruta_fichero_original> </ruta_enlace>
     mi_rm.c: ./mi_rm <disco> </ruta>
     mi_rmdir.c: ./mi_rmdir <disco> </ruta>
+    simulacion.c: ./simulacion <disco>
+    verificacion.c: ./verificacion <nombre_dispositivo> <directorio_simulación>
 
 -Observaciones:
     Se han realizado varias mejoras opcioanes, los mensajes de debug se pueden mostrar o ocultar

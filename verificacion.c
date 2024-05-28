@@ -1,3 +1,4 @@
+//Hecho por Alexandre Hierro Pedrosa, Carlos Larruscain Monar y Jaume Ribas Gayá
 #include "verificacion.h"
 
 int main(int argc,char **argv){

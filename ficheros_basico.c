@@ -322,11 +322,9 @@ int leer_inodo(unsigned int ninodo, struct inodo *inodo){
     if(bread(posSB,&SB)==FALLO){
         return FALLO;
     }
-
+    
     int bloqueinodo=SB.posPrimerBloqueAI+(ninodo/(BLOCKSIZE/INODOSIZE));
-
     struct inodo inodos[BLOCKSIZE/INODOSIZE];
-
     if(bread(bloqueinodo,&inodos)==FALLO){
         return FALLO;
     }

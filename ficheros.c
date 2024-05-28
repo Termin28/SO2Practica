@@ -229,11 +229,13 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
     mi_waitSem();
     struct inodo inodo;
     if(leer_inodo(ninodo,&inodo)==FALLO){
+        mi_signalSem();
         return FALLO;
     }
     inodo.permisos=permisos;
     inodo.ctime=time(NULL);
     if(escribir_inodo(ninodo,&inodo)==FALLO){
+        mi_signalSem();
         return FALLO;
     }
     mi_signalSem();
@@ -248,6 +250,9 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
 int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
     struct inodo inodo;
     if(leer_inodo(ninodo,&inodo)==FALLO){
+        return FALLO;
+    }
+    if((inodo.permisos&2)!=2){
         return FALLO;
     }
 
